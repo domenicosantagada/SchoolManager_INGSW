@@ -1,0 +1,3 @@
+Non è richiesto l'observer per questo metodo perchè:
+
+insertCompito: Questo metodo è tipicamente chiamato solo dal CompitiController del docente. Dopo l'inserimento, il codice originale del Controller esegue direttamente la navigazione verso la home page del professore (SceneHandler.getInstance().setProfessorHomePage(...)). Poiché la navigazione forza un ricaricamento completo del Context, l'Observer non è strettamente necessario per l'efficacia immediata, anche se potrebbe essere aggiunto per maggiore coerenza.

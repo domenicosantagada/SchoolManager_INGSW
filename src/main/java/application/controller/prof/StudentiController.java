@@ -29,9 +29,14 @@ import java.util.List;
 
 public class StudentiController implements DataObserver {
 
+    // Lista osservabile per la tabella degli studenti
     private ObservableList<StudenteTable> studenti = FXCollections.observableArrayList();
 
+    // Lista normale per la gestione interna degli studenti
     private List<StudenteTable> studentiList;
+
+    // Studente selezionato nella tabella
+    private StudenteTable studenteSelezionato;
 
     @FXML
     private Label nominativoStudenteVotoPane;
@@ -63,7 +68,6 @@ public class StudentiController implements DataObserver {
     @FXML
     private TableColumn<StudenteTable, Integer> voteColumn;
 
-
     @FXML
     private Label classeLabel;
 
@@ -82,73 +86,97 @@ public class StudentiController implements DataObserver {
     @FXML
     private TextField votoField;
 
+    // Metodo per esportare l'andamento della classe in PDF
+    // Utilizza il pattern Strategy per scegliere la strategia di esportazione
     @FXML
     private void exportPDF() {
 
-        //PDFGenerator.getInstance().pdfAndamentoClasse(studentiList);
+        // Prima -> PDFGenerator.getInstance().pdfAndamentoClasse(studentiList);
+
         // Implementazione del pattern Strategy
+        // Creiamo il contesto di esportazione
         ExportContext exportContext = ExportContext.getInstance();
-        exportContext.setStrategy(new PDFClassExportStrategy()); // 1. Imposta la strategia concreta (CSV Classe)
-        //exportContext.setStrategy(new CSVClassExportStrategy()); // 1. Imposta la strategia concreta (PDF Classe)
-        exportContext.exportAndamentoClasse(studentiList); // 2. Esegue il contesto
+
+        // Impostiamo la strategia concreta desiderata (PDF o CSV)
+        exportContext.setStrategy(new PDFClassExportStrategy());
+        //exportContext.setStrategy(new CSVClassExportStrategy());
+
+        // Eseguiamo l'esportazione
+        exportContext.exportAndamentoClasse(studentiList);
     }
 
-    private StudenteTable studenteSelezionato = null;
-
+    // Metodo per mostrare il pannello di aggiunta nota
     @FXML
     private void showNotePaneClicked() {
 
+        // Otteniamo lo studente selezionato dalla tabella
         studenteSelezionato = studentiTableView.getSelectionModel().getSelectedItem();
 
+        // Controlliamo se uno studente è stato effettivamente selezionato
         if (studenteSelezionato == null) {
             SceneHandler.getInstance().showWarning(MessageDebug.STUDENT_NOT_SELECTED);
         } else {
+            // Mostriamo il pannello per aggiungere una nota
             addNotaPane.setVisible(true);
+            // Impostiamo il nome dello studente selezionato nel pannello
             nominativoStudenteLabel.setText(studenteSelezionato.cognome().toUpperCase() + " " + studenteSelezionato.nome().toUpperCase());
+            // Disabilitiamo il pannello principale e applichiamo un effetto di sfocatura
             mainPane.setDisable(true);
             mainPane.setEffect(new GaussianBlur());
         }
     }
 
+    // Metodo per aggiungere una nota allo studente selezionato
     @FXML
     private void addNotaClicked() {
+
+        // Otteniamo il testo della nota dal campo di input e verifichiamo che non sia vuoto
         String nota = notaField.getText();
         if (nota.trim().isEmpty()) {
             SceneHandler.getInstance().showWarning(MessageDebug.CAMPS_NOT_EMPTY);
             nota = "";
         } else {
+
+            // Creiamo un oggetto Nota con i dati necessari
             Nota notaDB = new Nota(studenteSelezionato.username(), SceneHandler.getInstance().getUsername(), nota.toUpperCase(), LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString());
+
+            // Tentiamo di inserire la nota nel database
             if (Database.getInstance().insertNota(notaDB)) {
+                // In caso di successo, mostriamo un messaggio di conferma e resettiamo il pannello
                 SceneHandler.getInstance().showInformation(MessageDebug.NOTE_ADDED);
                 notaField.clear();
-                addNotaPane.setVisible(false);
-                mainPane.setDisable(false);
-                mainPane.setEffect(null);
+                backNoteClicked();
             } else {
+                // In caso di errore, mostriamo un messaggio di avviso
                 SceneHandler.getInstance().showWarning(MessageDebug.ERROR_NOTE_ADD);
             }
         }
     }
 
+    // Metodo per aggiornare il voto dello studente selezionato
     @FXML
     private void updateVoto() {
 
         try {
+            // Otteniamo il nuovo voto dal campo di input
             Integer newVoto = Integer.parseInt(votoField.getText());
 
+            // Verifichiamo che il voto sia valido (tra 0 e 10)
             if (newVoto < 0 || newVoto > 10) {
                 SceneHandler.getInstance().showWarning(MessageDebug.VOTO_NOT_VALID);
             } else {
+
+                // Creiamo un oggetto ValutazioneStudente con i dati necessari
                 ValutazioneStudente valutazione = new ValutazioneStudente(studenteSelezionato.username(), SceneHandler.getInstance().getUsername(), Database.getInstance().getMateriaProf(SceneHandler.getInstance().getUsername()), LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(), newVoto);
+
+                // Tentiamo di aggiornare il voto nel database
                 if (Database.getInstance().updateVoto(valutazione)) {
+                    // In caso di successo, mostriamo un messaggio di conferma e resettiamo il pannello
                     SceneHandler.getInstance().showInformation(MessageDebug.VOTO_UPDATED);
                     votoField.clear();
-                    addVotoPane.setVisible(false);
-                    mainPane.setDisable(false);
-                    mainPane.setEffect(null);
-
-
+                    backVoteClickedVotoPane();
                 } else {
+                    // In caso di errore, mostriamo un messaggio di avviso
                     SceneHandler.getInstance().showWarning(MessageDebug.ERROR_VOTO_UPDATE);
                 }
             }
@@ -157,6 +185,7 @@ public class StudentiController implements DataObserver {
         }
     }
 
+    // Metodo per chiudere il pannello di aggiunta nota
     @FXML
     private void backNoteClicked() {
         addNotaPane.setVisible(false);
@@ -164,6 +193,15 @@ public class StudentiController implements DataObserver {
         mainPane.setEffect(null);
     }
 
+    // Metodo per chiudere il pannello di aggiunta voto
+    @FXML
+    public void backVoteClickedVotoPane() {
+        addVotoPane.setVisible(false);
+        mainPane.setDisable(false);
+        mainPane.setEffect(null);
+    }
+
+    // Metodo per tornare alla home page del professore
     @FXML
     private void backButtonClicked() throws IOException {
         SceneHandler.getInstance().setProfessorHomePage(SceneHandler.getInstance().getUsername());
@@ -172,21 +210,24 @@ public class StudentiController implements DataObserver {
 
     public void initialize() {
 
+        // Registriamo questo controller come osservatore del database
         Database.getInstance().attach(this);
 
-        // Impostiamo la classe
+        // Impostiamo la classe del professore e carichiamo gli studenti associati
         classeLabel.setText(Database.getInstance().getClasseUser(SceneHandler.getInstance().getUsername()));
         studentiList = Database.getInstance().getStudentiClasse(classeLabel.getText(), Database.getInstance().getMateriaProf(SceneHandler.getInstance().getUsername()));
-        aggiornaNumeroStudenti();
-        aggiotnaAndamentoClasse();
 
-        // Inseriamo gli studenti della classe nella tabella
+        aggiornaNumeroStudenti();
+        aggiornaAndamentoClasse();
+
+        // Configuriamo le colonne della tabella e carichiamo i dati
         setValueFactory();
         studentiTableView.setItems(studenti);
 
     }
 
-    private void aggiotnaAndamentoClasse() {
+    // Metodo per aggiornare l'andamento della classe (numero di sufficienti e insufficienti)
+    private void aggiornaAndamentoClasse() {
         int insufficienti = 0;
         int sufficienti = 0;
         for (StudenteTable studente : studentiList) {
@@ -200,11 +241,12 @@ public class StudentiController implements DataObserver {
         sufficientLabel.setText(String.valueOf(sufficienti));
     }
 
+    // Metodo per aggiornare il numero totale di studenti
     private void aggiornaNumeroStudenti() {
-
         totalStudentsLabel.setText(String.valueOf(studentiList.size()));
     }
 
+    // Metodo per configurare le colonne della tabella degli studenti
     private void setValueFactory() {
 
         nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().nome().toUpperCase()));
@@ -216,36 +258,37 @@ public class StudentiController implements DataObserver {
 
     }
 
+    // Metodo per aggiornare la lista degli studenti nella tabella
     private void setStudents(List<StudenteTable> studentiList) {
         studenti.clear();
         studenti.addAll(studentiList);
         studentiTableView.refresh();
     }
 
+    // Metodo per mostrare il pannello di aggiunta voto
     public void showVotoPageClicked(ActionEvent actionEvent) {
 
+        // Otteniamo lo studente selezionato dalla tabella
         studenteSelezionato = studentiTableView.getSelectionModel().getSelectedItem();
 
+        // Controlliamo se uno studente è stato effettivamente selezionato
         if (studenteSelezionato == null) {
             SceneHandler.getInstance().showWarning(MessageDebug.STUDENT_NOT_SELECTED);
         } else {
+
+            // Mostriamo il pannello per aggiungere un voto
             addVotoPane.setVisible(true);
             nominativoStudenteVotoPane.setText(studenteSelezionato.cognome().toUpperCase() + " " + studenteSelezionato.nome().toUpperCase());
+            // Disabilitiamo il pannello principale e applichiamo un effetto di sfocatura
             mainPane.setDisable(true);
             mainPane.setEffect(new GaussianBlur());
         }
 
     }
 
-    public void backVoteClickedVotoPane() {
-        addVotoPane.setVisible(false);
-        mainPane.setDisable(false);
-        mainPane.setEffect(null);
-    }
-
+    // Metodo chiamato quando i dati osservati cambiano (Pattern Observer)
     @Override
     public void update(Object event) {
-        // Ignoriamo l'evento, aggiorniamo semplicemente l'intera tabella della classe
 
         // Ricarica i dati dal Database
         studentiList = Database.getInstance().getStudentiClasse(
@@ -253,9 +296,9 @@ public class StudentiController implements DataObserver {
                 Database.getInstance().getMateriaProf(SceneHandler.getInstance().getUsername())
         );
 
-        // Aggiorna la UI
+        // Aggiorna le statistiche e la tabella
         aggiornaNumeroStudenti();
-        aggiotnaAndamentoClasse();
-        setStudents(studentiList); // Aggiorna la tabella
+        aggiornaAndamentoClasse();
+        setStudents(studentiList);
     }
 }

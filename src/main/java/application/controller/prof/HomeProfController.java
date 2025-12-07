@@ -13,48 +13,49 @@ import java.io.IOException;
 public class HomeProfController {
 
     @FXML
-    private Label profInfo; // Informazioni sul professore
+    private Label profInfo;          // Nome completo del professore
 
     @FXML
-    private Label materiaProf; // Materia associata al professore
+    private Label materiaProf;       // Materia insegnata dal professore
 
     @FXML
-    private ImageView logoView; // Logo visualizzato nella pagina
+    private ImageView logoView;      // Logo dell'applicazione da mostrare nella home
 
     @FXML
     public void studentsClicked(ActionEvent actionEvent) throws IOException {
-        // Logica per gestire il click sul pulsante "Studenti"
+        // Reindirizza alla lista degli studenti associati al professore
         SceneHandler.getInstance().setStudentsListPage();
     }
 
     @FXML
     public void assgimentClicked(ActionEvent actionEvent) throws IOException {
-        // Logica per gestire il click sul pulsante "Compiti"
+        // Apre la sezione dedicata ai compiti/assegnazioni
         SceneHandler.getInstance().setAssignmentPage();
     }
 
     @FXML
     public void assenzeClicked(ActionEvent actionEvent) throws IOException {
-        // Logica per gestire il click sul pulsante "Voti"
+        // Mostra la pagina relativa ai voti degli studenti
         SceneHandler.getInstance().setVotesPage();
     }
 
     @FXML
     public void logoutClicked(ActionEvent actionEvent) throws IOException {
-        // Naviga alla pagina di login
+        // Effettua il logout e ritorna alla schermata di login
         SceneHandler.getInstance().setLoginPage();
     }
 
     public void initialize() {
+        // Carica e visualizza il logo dell'applicazione
         String imagePath = getClass().getResource("/icon/logo1.png").toExternalForm();
         logoView.setImage(new Image(imagePath));
         logoView.setSmooth(true);
 
-        // Recupera le informazioni dello studente
+        // Imposta il nome completo del professore nella UI
         String profInfoText = Database.getInstance().getFullName(SceneHandler.getInstance().getUsername());
         profInfo.setText(profInfoText.toUpperCase());
 
-        // Recupera la materia associata al professore
+        // Imposta la materia del professore nella UI
         String materiaProfText = Database.getInstance().getMateriaProf(SceneHandler.getInstance().getUsername());
         materiaProf.setText(materiaProfText.toUpperCase());
     }

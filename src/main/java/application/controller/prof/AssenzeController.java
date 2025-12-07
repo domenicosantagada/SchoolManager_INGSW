@@ -170,17 +170,29 @@ public class AssenzeController {
     @FXML
     private void addAssenzaClicked() {
         try {
+            // Controllo che i campi non siano vuoti, in caso contrario mostro un avviso all'utente
             if (studenteChoice.getSelectionModel().isEmpty() || dataAssenza.getValue() == null) {
                 SceneHandler.getInstance().showWarning(MessageDebug.CAMPS_NOT_EMPTY);
             }
-            // voglio ottenere la posizione dello studente selezionato
+
+            // Ottengo la posizione dello studente selezionato nella griglia del calendario
+            // Recupero l'indice selezionato nella ChoiceBox e lo uso per ottenere lo studente dalla lista
             Integer posizione = posizioneStudenti.get(studenti.get(studenteChoice.getSelectionModel().getSelectedIndex()));
             Integer giornoAssenza = dataAssenza.getValue().getDayOfMonth();
             StudenteTable studente = studenti.get(posizione);
 
+            // Creo una nuova assenza e la aggiungo al database
             Assenza assenza = new Assenza(studente.username(), dataAssenza.getValue().getDayOfMonth(), dataAssenza.getValue().getMonthValue(), dataAssenza.getValue().getYear());
             Database.getInstance().addAssenza(assenza);
+
+            // Coloro la cella corrispondente alla nuova assenza nel calendario
             coloraCella(posizione, giornoAssenza);
+
+            // Torno al pannello principale
+            // (opzionale: in questo caso se voglio aggiungere più assenze di seguito
+            // devo riaprire il pannello di aggiunta assenza)
+            backUpdateClicked();
+            
         } catch (Exception e) {
             System.out.println("Errore nell'aggiunta dell'assenza");
         }
@@ -214,45 +226,56 @@ public class AssenzeController {
 
     private void populateCalendar() {
 
+        // Inizializziamo il foglio di stile per la griglia del calendario
         Scene scene = calendarioGrid.getScene();
         if (scene != null) {
             scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
         }
 
+        // Otteniamo il numero di giorni del mese corrente
         Integer dayOfMonth = mese.lengthOfMonth();
-        // voglio ordinare la lista degli studenti per cognome da A a Z ignorando le lettere maiuscole e minuscole
+
+        // Ordiniamo gli studenti in ordine alfabetico per cognome prima di popolare la griglia
         studenti.sort((s1, s2) -> s1.cognome().compareToIgnoreCase(s2.cognome()));
 
+        // Puliamo la griglia prima di popolarla
         calendarioGrid.getChildren().clear();
         calendarioGrid.getColumnConstraints().clear();
         calendarioGrid.getRowConstraints().clear();
 
-        // Impostiamo la ColumnConstraints per la colonna degli studenti
+        // Aggiungiamo la colonna per i nomi degli studenti
         ColumnConstraints studentColumn = new ColumnConstraints();
         studentColumn.setHgrow(Priority.NEVER); // La colonna degli studenti non si espande
         studentColumn.setPrefWidth(170); // Larghezza fissa per la colonna degli studenti
         calendarioGrid.getColumnConstraints().add(studentColumn); // Aggiungi la colonna per gli studenti
 
-        // Aggiungiamo le colonne per i giorni (distribuzione equa della larghezza)
+        // Aggiungiamo le colonne per i giorni del mese
         for (int i = 0; i < dayOfMonth; i++) {
             ColumnConstraints dayColumn = new ColumnConstraints();
             dayColumn.setHgrow(Priority.ALWAYS);  // Le colonne dei giorni si distribuiscono equamente
             dayColumn.setMinWidth(20); // Impostiamo una larghezza minima per i giorni
-            calendarioGrid.getColumnConstraints().add(dayColumn);
+            calendarioGrid.getColumnConstraints().add(dayColumn); // Aggiungi la colonna per il giorno
         }
 
-        // Aggiungiamo le righe per gli studenti
-        for (int i = 0; i < studenti.size() + 1; i++) { // +1 per la riga dei giorni
+        // Aggiungiamo le righe per ogni studente più una riga per i giorni
+        for (int i = 0; i < studenti.size() + 1; i++) {
             RowConstraints row = new RowConstraints();
             row.setVgrow(Priority.SOMETIMES); // La crescita verticale sarà uguale per tutte le righe
-            calendarioGrid.getRowConstraints().add(row);
+            calendarioGrid.getRowConstraints().add(row); // Aggiungi la riga alla griglia
         }
 
         // Popoliamo la griglia con i nomi degli studenti sulla prima colonna
         for (int i = 0; i < studenti.size(); i++) {
+            // Creiamo una label per ogni studente con cognome e nome in maiuscolo
             Label studenteLabel = new Label(" " + studenti.get(i).cognome().toUpperCase() + " " + studenti.get(i).nome().toUpperCase());
-            studenteLabel.setMaxWidth(Double.MAX_VALUE); // Imposta la larghezza massima per adattarsi al contenuto
-            studenteLabel.getStyleClass().add("cell"); // Applica uno stile (opzionale)
+
+            // Impostiamo la larghezza massima della label per occupare tutta la cella
+            studenteLabel.setMaxWidth(Double.MAX_VALUE);
+
+            // Aggiungiamo uno stile alla label
+            studenteLabel.getStyleClass().add("cell");
+
+            // Aggiungiamo la label dello studente alla griglia nella prima colonna (0) e nella riga corrispondente (i + 1) perché la prima riga è riservata ai giorni
             calendarioGrid.add(studenteLabel, 0, i + 1); // Aggiungi gli studenti alla prima colonna
 
             // Centra la label orizzontalmente e verticalmente
@@ -262,8 +285,13 @@ public class AssenzeController {
 
         // Popoliamo la griglia con i giorni del mese sulla prima riga
         for (int i = 0; i < dayOfMonth; i++) {
-            Label giornoLabel = new Label(String.valueOf(i + 1));
-            giornoLabel.getStyleClass().add("cell"); // Applica uno stile (opzionale)
+            // Creiamo una label per ogni giorno del mese
+            Label giornoLabel = new Label(String.valueOf(i + 1));   // i + 1 perché i parte da 0 e i giorni da 1
+
+            // Aggiungiamo uno stile alla label
+            giornoLabel.getStyleClass().add("cell");
+
+            // Aggiungiamo la label del giorno alla griglia nella riga 0 e nella colonna corrispondente (i + 1) perché la prima colonna è riservata agli studenti
             calendarioGrid.add(giornoLabel, i + 1, 0); // Aggiungi i giorni nella prima riga
 
             // Centra la label orizzontalmente e verticalmente
@@ -274,29 +302,40 @@ public class AssenzeController {
 
     @FXML
     public void showAddAssenzaPane() {
+        // Resettiamo i campi del pannello di aggiunta assenza
         studenteChoice.getSelectionModel().clearSelection();
+        // Impostiamo la data corrente come data di assenza predefinita
         dataAssenza.setValue(LocalDate.now());
 
+        // Mostriamo il pannello di aggiunta assenza e disabilitiamo il pannello principale con un effetto blur
         mainPane.setDisable(true);
         updatePane.setVisible(true);
         mainPane.setEffect(new GaussianBlur());
     }
 
+    // Cambia il mese visualizzato nel calendario al mese precedente
     public void mesePrecedente() {
         mese = mese.minusMonths(1);
         String meseCorrente = meseItaliano(String.valueOf(mese.getMonth()));
-        //aggiorniamo la label del mese
+
+        // Aggiorniamo la label del mese
         meseLabel.setText(meseCorrente);
+        // Ripopoliamo il calendario con i giorni del mese aggiornato
         populateCalendar();
+        // Aggiorniamo le assenze nel calendario
         setAssenze();
     }
 
+    // Cambia il mese visualizzato nel calendario al mese successivo
     public void meseSuccessivo() {
         mese = mese.plusMonths(1);
         String meseCorrente = meseItaliano(String.valueOf(mese.getMonth()));
-        //aggiorniamo la label del mese
+
+        // Aggiorniamo la label del mese
         meseLabel.setText(meseCorrente);
+        // Ripopoliamo il calendario con i giorni del mese aggiornato
         populateCalendar();
+        // Aggiorniamo le assenze nel calendario
         setAssenze();
     }
 }

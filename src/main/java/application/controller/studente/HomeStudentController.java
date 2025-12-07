@@ -14,31 +14,31 @@ public class HomeStudentController {
 
     @FXML
     private ImageView logoView;
-
     @FXML
     private Label studentInfo;
-
     @FXML
     private Label classeStudente;
 
+    // Metodo per per mostrare la pagina delle performance dello studente
     @FXML
     public void performanceClicked(ActionEvent actionEvent) throws IOException {
-        // Logica per gestire il click su "Andamento"
         SceneHandler.getInstance().setAndamentoPage();
     }
 
+    // Metodo per per mostrare la pagina dei compiti assegnati allo studente
     @FXML
     public void assignmentClicked(ActionEvent actionEvent) throws IOException {
-        // Logica per gestire il click su "Compiti"
         SceneHandler.getInstance().setCompitiPage();
     }
 
+    // Metodo per per mostrare la pagina delle note disciplinari dello studente
     @FXML
     public void notesButtonClicked(ActionEvent actionEvent) throws IOException {
         // Logica per gestire il click su "Note disciplinari"
         SceneHandler.getInstance().setNotePage();
     }
 
+    // Metodo per effettuare il logout dello studente
     @FXML
     public void logoutClicked(ActionEvent actionEvent) throws IOException {
         // Naviga alla pagina di login
@@ -46,6 +46,8 @@ public class HomeStudentController {
     }
 
     public void initialize() {
+
+        // Carica e imposta il logo dell'istituto
         String imagePath = getClass().getResource("/icon/logo1.png").toExternalForm();
         logoView.setImage(new Image(imagePath));
 
@@ -53,6 +55,7 @@ public class HomeStudentController {
         String studentInfoText = Database.getInstance().getFullName(SceneHandler.getInstance().getUsername());
         studentInfo.setText(studentInfoText.toUpperCase());
 
+        // Recupera e imposta la classe dello studente
         String classe = Database.getInstance().getClasseUser(SceneHandler.getInstance().getUsername());
         classeStudente.setText(classe.toUpperCase());
     }

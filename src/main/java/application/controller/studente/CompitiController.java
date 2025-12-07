@@ -14,17 +14,16 @@ import java.util.List;
 
 public class CompitiController {
 
-
-    @FXML
-    private VBox votiContainer;
-
-    @FXML
-    private Label classeLabel;
-
     private String studente;
     private String classe;
     private List<CompitoAssegnato> compiti = null;
 
+    @FXML
+    private VBox votiContainer;
+    @FXML
+    private Label classeLabel;
+
+    // Metodo per tornare alla home dello studente
     @FXML
     public void backButtonClicked() throws IOException {
         SceneHandler.getInstance().setStudentHomePage(SceneHandler.getInstance().getUsername());
@@ -40,9 +39,15 @@ public class CompitiController {
         visualizzaCompiti();
     }
 
+    // Metodo per visualizzare i compiti assegnati
     private void visualizzaCompiti() {
+        // Controllo se ci sono compiti assegnati
         if (!compiti.isEmpty() && compiti != null) {
+
+            // Pulisco il container dei compiti
             votiContainer.getChildren().clear();
+
+            // Genero le etichette per ogni compito
             for (CompitoAssegnato comp : compiti)
                 generaLabel(comp);
         }
@@ -64,15 +69,16 @@ public class CompitiController {
         newBorderPane.setAlignment(newBorderPane.getBottom(), Pos.CENTER);
         newBorderPane.setAlignment(newBorderPane.getCenter(), Pos.CENTER);
 
-        /*aggiungi stile al border pane*/
+        // Aggiungo stile al BorderPane
         newBorderPane.getStyleClass().add("compitiPane");
-        /*aggiungo stile al label nel top*/
+        // Aggiungo stile al label nel top
         materia.getStyleClass().add("materiaLabel");
-        /*aggiungo stile al label nel center*/
+        // Aggiungo stile al label nel center
         message.getStyleClass().add("messageLabel");
-        /*aggiungo stile al label nel bottom*/
+        // Aggiungo stile al label nel bottom
         date.getStyleClass().add("dateLabel");
 
+        // Aggiungo il BorderPane al container dei voti
         votiContainer.getChildren().add(newBorderPane);
     }
 }

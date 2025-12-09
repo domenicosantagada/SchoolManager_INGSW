@@ -180,7 +180,8 @@ public class Database implements ObservableSubject {
     }
 
 
-    private void createTables() {  // Corretto il nome del metodo
+    // Funzione che crea le tabelle nel database se non esistono già
+    private void createTables() {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(CREATE_USER_TABLE);
             statement.executeUpdate(CREATE_CODICE_CLASSE_TABLE);
@@ -196,6 +197,7 @@ public class Database implements ObservableSubject {
     }
 
 
+    // Metodo per registrare un observer
     private boolean isConnected() {
         try {
             return connection != null && !connection.isClosed();
@@ -205,6 +207,7 @@ public class Database implements ObservableSubject {
     }
 
 
+    // Metodo per creare la tabella user nel database
     private static final String CREATE_USER_TABLE = """ 
             CREATE TABLE IF NOT EXISTS user (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -218,6 +221,7 @@ public class Database implements ObservableSubject {
             );
             """;
 
+    // Metodo per creare la tabella codiciClassi nel database
     private static final String CREATE_CODICE_CLASSE_TABLE = """ 
             CREATE TABLE IF NOT EXISTS codiciClassi (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -227,6 +231,7 @@ public class Database implements ObservableSubject {
                );
             """;
 
+    // Metodo per creare la tabella profMateria nel database
     private static final String CREATE_PROF_MATERIA_TABLE = """ 
             CREATE TABLE IF NOT EXISTS profMateria (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -236,6 +241,7 @@ public class Database implements ObservableSubject {
             );
             """;
 
+    // Metodo per creare la tabella studentiVoti nel database
     private static final String CREATE_STUDENTI_VOTI_TABLE = """
             CREATE TABLE IF NOT EXISTS studentiVoti (
                 studente TEXT NOT NULL,
@@ -248,6 +254,7 @@ public class Database implements ObservableSubject {
             );
             """;
 
+    // Metodo per creare la tabella materie nel database
     private static final String CREATE_MATERIE_TABLE = """
             CREATE TABLE IF NOT EXISTS materie (
             	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -255,6 +262,7 @@ public class Database implements ObservableSubject {
             );
             """;
 
+    // Metodo per creare la tabella note nel database
     private static final String CREATE_NOTE_TABLE = """
             CREATE TABLE IF NOT EXISTS note (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -267,6 +275,7 @@ public class Database implements ObservableSubject {
             );
             """;
 
+    // Metodo per creare la tabella compiti nel database
     private static final String CREATE_COMPITI_TABLE = """
             CREATE TABLE IF NOT EXISTS compiti (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -280,6 +289,7 @@ public class Database implements ObservableSubject {
             );
             """;
 
+    // Metodo per creare la tabella assenze nel database
     private static final String CREATE_ASSENZE_TABLE = """
             CREATE TABLE IF NOT EXISTS assenze (
                 studente TEXT NOT NULL,
@@ -291,6 +301,8 @@ public class Database implements ObservableSubject {
             );
             """;
 
+    // Metodo per ottenere la tipologia e la classe dell'utente in base al codice di iscrizione
+    // Es. se il codice di iscrizione è 001 ritorna tipologia: studente, classe: 1A
     public TipologiaClasse getTipologiaUtente(String codiceIscrizione) {
         String query = "SELECT tipologia, nomeClasse FROM codiciClassi WHERE codiceAccesso = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -308,6 +320,7 @@ public class Database implements ObservableSubject {
         return null;
     }
 
+    // Metodo per inserire uno studente nel database
     public boolean insertStudente(Studente studente) {
         String query = "INSERT INTO user (username, nome, cognome, password, dataNascita, classeAppartenenza, tipo) VALUES (?, ?, ?, ?, ?, ?, ?)";
         String query2 = "INSERT INTO studentiVoti (studente, materia, dataValutazione,voto) VALUES (?, ?, ?, ?)";
@@ -324,6 +337,8 @@ public class Database implements ObservableSubject {
             statement.setString(7, "studente");
             statement.executeUpdate();
             statement2.setString(1, studente.user().username());
+
+            // Inserimento voci iniziali nella tabella studentiVoti per ogni materia
             for (String materia : materie) {
                 statement2.setString(2, materia);
                 statement2.setString(3, "Nd");
@@ -338,6 +353,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per ottenere la lista delle materie presenti nel database
     private List<String> getMaterie() {
         String query = "SELECT nome FROM materie";
         List<String> materie = new ArrayList<>();
@@ -352,6 +368,7 @@ public class Database implements ObservableSubject {
         return materie;
     }
 
+    // Metodo per inserire un professore nel database
     public boolean insertProfessore(Professore professore) {
         String query = "INSERT INTO user (username, nome, cognome, password, dataNascita, classeAppartenenza, tipo) VALUES (?, ?, ?, ?, ?, ?, ?)";
         String query2 = "INSERT INTO profMateria (username, materia) VALUES (?, ?)";
@@ -377,6 +394,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per verificare se un username è già utilizzato
     public boolean usernameUtilizzato(String username) {
         String query = "SELECT username FROM user WHERE username = ?";
         boolean utilizzato = false;
@@ -392,6 +410,7 @@ public class Database implements ObservableSubject {
         return utilizzato;
     }
 
+    // Metodo per verificare se un codice di iscrizione è valido
     public boolean codiceIscrizioneValido(String newValue) {
         String query = "SELECT codiceAccesso FROM codiciClassi WHERE codiceAccesso = ?";
         boolean valido = false;
@@ -407,6 +426,7 @@ public class Database implements ObservableSubject {
         return valido;
     }
 
+    // Metodo per validare le credenziali di accesso di un utente
     public boolean validateCredentials(String username, String password) {
         String query = "SELECT password FROM user WHERE username = ?";
         boolean result = false;
@@ -423,6 +443,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per ottenere il tipo di utente (studente o professore) in base all'username
     public String getTypeUser(String username) {
         String query = "SELECT tipo FROM user WHERE username = ?";
         String result = "";
@@ -438,6 +459,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per ottenere il nome completo di un utente in base all'username
     public String getFullName(String username) {
         String query = "SELECT nome, cognome FROM user WHERE username = ?";
         String result = "";
@@ -454,6 +476,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per ottenere la materia insegnata da un professore in base all'username
     public String getMateriaProf(String username) {
         String query = "SELECT materia FROM profMateria WHERE username = ?";
         String result = "";
@@ -469,7 +492,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
-
+    // Metodo per ottenere la tipologia di utente in base al codice di iscrizione
     public String tipologiaUser(String codiceIscrizione) {
         String query = "SELECT tipologia FROM codiciClassi WHERE codiceAccesso = ?";
         String result = "";
@@ -485,6 +508,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per ottenere la classe di appartenenza di un utente in base all'username
     public String getClasseUser(String username) {
         String query = "SELECT classeAppartenenza FROM user WHERE username = ?";
         String result = "";
@@ -500,6 +524,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per ottenere la lista degli studenti di una classe con le loro valutazioni in una materia specifica
     public List<StudenteTable> getStudentiClasse(String classe, String materia) {
         List<StudenteTable> studenti = new ArrayList<>();
         String query = """
@@ -528,7 +553,7 @@ public class Database implements ObservableSubject {
         return studenti;
     }
 
-
+    // Metodo per ottenere tutte le materie presenti nell'istituto
     public List<String> getAllMaterieIstituto() {
         String query = "SELECT nome FROM materie";
         List<String> materie = new ArrayList<>();
@@ -543,6 +568,7 @@ public class Database implements ObservableSubject {
         return materie;
     }
 
+    // Metodo per inserire una nota nel database
     public boolean insertNota(Nota nota) {
         String query = "INSERT INTO note (studente, professore, nota, dataInserimento) VALUES (?, ?, ?, ?)";
         boolean result = false;
@@ -562,6 +588,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per aggiornare il voto di uno studente in una materia specifica
     public boolean updateVoto(ValutazioneStudente valutazione) {
         // Query che aggiorna il voto e la data di valutazione dello studente
         String query = """
@@ -586,6 +613,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per inserire un compito assegnato nel database
     public boolean insertCompito(CompitoAssegnato compito) {
         String query = "INSERT INTO compiti (professore, materia, data, descrizione, classe) VALUES (?, ?, ?, ?, ?)";
         boolean result = false;
@@ -603,6 +631,7 @@ public class Database implements ObservableSubject {
         return result;
     }
 
+    // Metodo per ottenere la lista dei compiti assegnati a una classe specifica
     public List<CompitoAssegnato> getCompitiClasse(String classe) {
         List<CompitoAssegnato> compiti = new ArrayList<>();
         String query = """
@@ -627,6 +656,7 @@ public class Database implements ObservableSubject {
         return compiti;
     }
 
+    // Metodo per ottenere la lista dei voti di uno studente
     public List<ValutazioneStudente> getVotiStudente(String studente) {
         List<ValutazioneStudente> voti = new ArrayList<>();
         String query = """
@@ -651,6 +681,7 @@ public class Database implements ObservableSubject {
         return voti;
     }
 
+    // Metodo per aggiungere un'assenza di uno studente
     public void addAssenza(Assenza assenza) {
         String query = "INSERT INTO assenze (studente, giorno, mese, anno) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -667,6 +698,7 @@ public class Database implements ObservableSubject {
         }
     }
 
+    // Metodo per ottenere le assenze di uno studente in un mese specifico
     public List<Assenza> getAssenzeStudente(String studente, int m) {
         List<Assenza> assenze = new ArrayList<>();
         String query = """
@@ -690,6 +722,7 @@ public class Database implements ObservableSubject {
         return assenze;
     }
 
+    //
     public List<Nota> getNoteStudente(String studente) {
         List<Nota> note = new ArrayList<>();
         String query = "SELECT professore, nota, dataInserimento FROM note WHERE studente = ?";
@@ -709,6 +742,7 @@ public class Database implements ObservableSubject {
         return note;
     }
 
+    // Metodo per ottenere la data di nascita di un utente in base all'username
     public String getDataNascita(String username) {
         String query = "SELECT dataNascita FROM user WHERE username = ?";
         String result = "";

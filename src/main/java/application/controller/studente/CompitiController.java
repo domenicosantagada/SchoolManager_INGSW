@@ -29,6 +29,8 @@ public class CompitiController {
     public Label materiaLabeld;
     public Label argomentoLabel;
     public TextArea commentoArea;
+    @FXML
+    public VBox elaboratiContainer; // Container per gli elaborati già caricati
     private String studente;
     private String classe;
     private List<CompitoAssegnato> compiti = null;
@@ -121,10 +123,70 @@ public class CompitiController {
             // Imposto le etichette nel pannello di caricamento elaborato
             materiaLabeld.setText(comp.materia().toUpperCase());
             argomentoLabel.setText(comp.descrizione());
+
+            // Carico e mostro gli elaborati già caricati per questo compito
+            caricaElaboratiEsistenti(comp);
         });
 
         // Aggiungo il BorderPane al container dei compiti
         compitiContainer.getChildren().add(newBorderPane);
+    }
+
+    private void caricaElaboratiEsistenti(CompitoAssegnato comp) {
+        elaboratiContainer.getChildren().clear();
+        List<ElaboratoCaricato> elaborati = Database.getInstance().getElaboratiCompito(comp.id());
+
+        // Filtra solo gli elaborati dello studente corrente
+        elaborati.stream()
+                .filter(e -> e.studente().equals(studente))
+                .forEach(elaborato -> {
+                    BorderPane elPane = new BorderPane();
+                    elPane.setStyle("-fx-background-color: #f9f9f9; -fx-padding: 5; -fx-border-color: #ddd; -fx-border-radius: 3;");
+
+                    Label info = new Label(elaborato.data() + " - " + (elaborato.commento() != null && !elaborato.commento().isEmpty() ? elaborato.commento() : "Nessun commento"));
+                    info.setMaxWidth(300);
+                    info.setWrapText(true);
+
+                    javafx.scene.control.Button scaricaBtn = new javafx.scene.control.Button("Scarica");
+                    scaricaBtn.setOnAction(e -> scaricaPDF(elaborato));
+
+                    javafx.scene.control.Button eliminaBtn = new javafx.scene.control.Button("Elimina");
+                    eliminaBtn.setStyle("-fx-background-color: #ffcccc;");
+                    eliminaBtn.setOnAction(e -> {
+                        if (Database.getInstance().deleteElaborato(elaborato.id())) {
+                            SceneHandler.getInstance().showInformation("Elaborato eliminato.");
+                            caricaElaboratiEsistenti(comp); // Ricarica la lista
+                        } else {
+                            SceneHandler.getInstance().showWarning("Errore durante l'eliminazione.");
+                        }
+                    });
+
+                    javafx.scene.layout.HBox buttons = new javafx.scene.layout.HBox(10, scaricaBtn, eliminaBtn);
+                    buttons.setAlignment(Pos.CENTER_RIGHT);
+
+                    elPane.setLeft(info);
+                    elPane.setRight(buttons);
+                    BorderPane.setAlignment(info, Pos.CENTER_LEFT);
+
+                    elaboratiContainer.getChildren().add(elPane);
+                });
+    }
+
+    private void scaricaPDF(ElaboratoCaricato elaborato) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Salva il tuo elaborato");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("File PDF", "*.pdf"));
+        fileChooser.setInitialFileName("MioElaborato.pdf");
+
+        File file = fileChooser.showSaveDialog(mainPane.getScene().getWindow());
+        if (file != null) {
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+                fos.write(elaborato.file());
+                SceneHandler.getInstance().showInformation("File salvato: " + file.getAbsolutePath());
+            } catch (IOException e) {
+                SceneHandler.getInstance().showWarning("Errore salvataggio: " + e.getMessage());
+            }
+        }
     }
 
     // Metodo per tornare indietro dalla schermata di caricamento elaborato

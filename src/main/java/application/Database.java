@@ -11,15 +11,113 @@ import java.util.List;
 public class Database implements ObservableSubject {
 
 
-    // Lista di observer registrati che verranno notificati in caso di cambiamenti
-    private final List<DataObserver> observers = new ArrayList<>();
-
     private static final String DB_URL = "jdbc:sqlite:gestionale.db";
-
     // Singleton
     private static final Database instance = new Database();
+    // Metodo per creare la tabella user nel database
+    private static final String CREATE_USER_TABLE = """ 
+            CREATE TABLE IF NOT EXISTS user (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                nome TEXT NOT NULL,
+                cognome TEXT NOT NULL,
+                password TEXT NOT NULL,
+                dataNascita TEXT NOT NULL,
+                classeAppartenenza TEXT NOT NULL,
+                tipo TEXT NOT NULL
+            );
+            """;
+    // Metodo per creare la tabella codiciClassi nel database
+    private static final String CREATE_CODICE_CLASSE_TABLE = """ 
+            CREATE TABLE IF NOT EXISTS codiciClassi (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nomeClasse TEXT NOT NULL,
+                tipologia TEXT,
+                codiceAccesso TEXT NOT NULL
+               );
+            """;
+    // Metodo per creare la tabella profMateria nel database
+    private static final String CREATE_PROF_MATERIA_TABLE = """ 
+            CREATE TABLE IF NOT EXISTS profMateria (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                materia TEXT NOT NULL,
+                FOREIGN KEY (username) REFERENCES user(username)
+            );
+            """;
+    // Metodo per creare la tabella studentiVoti nel database
+    private static final String CREATE_STUDENTI_VOTI_TABLE = """
+            CREATE TABLE IF NOT EXISTS studentiVoti (
+                studente TEXT NOT NULL,
+                materia TEXT NOT NULL,
+                dataValutazione TEXT NOT NULL,
+                voto INTEGER NOT NULL,
+                PRIMARY KEY (studente, materia),
+                FOREIGN KEY (studente) REFERENCES user(username),
+                FOREIGN KEY (materia) REFERENCES materie(nome)
+            );
+            """;
+    // Metodo per creare la tabella materie nel database
+    private static final String CREATE_MATERIE_TABLE = """
+            CREATE TABLE IF NOT EXISTS materie (
+            	id INTEGER PRIMARY KEY AUTOINCREMENT,
+            	nome TEXT NOT NULL
+            );
+            """;
+    // Metodo per creare la tabella note nel database
+    private static final String CREATE_NOTE_TABLE = """
+            CREATE TABLE IF NOT EXISTS note (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                studente TEXT NOT NULL,
+                professore TEXT NOT NULL,
+                nota TEXT NOT NULL,
+                dataInserimento TEXT NOT NULL,
+                FOREIGN KEY (studente) REFERENCES user(username),
+                FOREIGN KEY (professore) REFERENCES user(username)
+            );
+            """;
+    // Metodo per creare la tabella compiti nel database
+    private static final String CREATE_COMPITI_TABLE = """
+            CREATE TABLE IF NOT EXISTS compiti (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                professore TEXT NOT NULL,
+                materia TEXT NOT NULL,
+                data TEXT NOT NULL,
+                descrizione TEXT NOT NULL,
+                classe TEXT NOT NULL,
+                FOREIGN KEY (professore) REFERENCES user(username),
+                FOREIGN KEY (materia) REFERENCES materie(nome)
+            );
+            """;
+    // Metodo per creare la tabella assenze nel database
+    private static final String CREATE_ASSENZE_TABLE = """
+            CREATE TABLE IF NOT EXISTS assenze (
+                studente TEXT NOT NULL,
+                giorno INTEGER NOT NULL,
+                mese INTEGER NOT NULL,
+                anno INTEGER NOT NULL,
+                motivazione TEXT DEFAULT 'Assenza non giustificata',
+                giustificata BOOLEAN DEFAULT 0,
+                FOREIGN KEY (studente) REFERENCES user(username),
+                PRIMARY KEY (studente, giorno, mese, anno)
+            );
+            """;
+    // Metodo per creare la tabella elaboratiCaricati nel database
+    private static final String CREATE_ELABORATI_TABLE = """
+            CREATE TABLE IF NOT EXISTS elaboratiCaricati (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                compitoId INTEGER NOT NULL,
+                studente TEXT NOT NULL,
+                data TEXT NOT NULL,
+                commento TEXT,
+                file BLOB,
+                FOREIGN KEY (compitoId) REFERENCES compiti(id),
+                FOREIGN KEY (studente) REFERENCES user(username)
+            );
+            """;
+    // Lista di observer registrati che verranno notificati in caso di cambiamenti
+    private final List<DataObserver> observers = new ArrayList<>();
     private Connection connection = null;
-
 
     // Costruttore privato per Singleton
     private Database() {
@@ -27,11 +125,9 @@ public class Database implements ObservableSubject {
         connect();
     }
 
-
     public static Database getInstance() {
         return instance;
     }
-
 
     private void connect() {
         try {
@@ -179,7 +275,6 @@ public class Database implements ObservableSubject {
         }
     }
 
-
     // Funzione che crea le tabelle nel database se non esistono già
     private void createTables() {
         try (Statement statement = connection.createStatement()) {
@@ -197,7 +292,6 @@ public class Database implements ObservableSubject {
         }
     }
 
-
     // Metodo per registrare un observer
     private boolean isConnected() {
         try {
@@ -206,117 +300,6 @@ public class Database implements ObservableSubject {
             return false;
         }
     }
-
-
-    // Metodo per creare la tabella user nel database
-    private static final String CREATE_USER_TABLE = """ 
-            CREATE TABLE IF NOT EXISTS user (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL UNIQUE,
-                nome TEXT NOT NULL,
-                cognome TEXT NOT NULL,
-                password TEXT NOT NULL,
-                dataNascita TEXT NOT NULL,
-                classeAppartenenza TEXT NOT NULL,
-                tipo TEXT NOT NULL
-            );
-            """;
-
-    // Metodo per creare la tabella codiciClassi nel database
-    private static final String CREATE_CODICE_CLASSE_TABLE = """ 
-            CREATE TABLE IF NOT EXISTS codiciClassi (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nomeClasse TEXT NOT NULL,
-                tipologia TEXT,
-                codiceAccesso TEXT NOT NULL
-               );
-            """;
-
-    // Metodo per creare la tabella profMateria nel database
-    private static final String CREATE_PROF_MATERIA_TABLE = """ 
-            CREATE TABLE IF NOT EXISTS profMateria (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL,
-                materia TEXT NOT NULL,
-                FOREIGN KEY (username) REFERENCES user(username)
-            );
-            """;
-
-    // Metodo per creare la tabella studentiVoti nel database
-    private static final String CREATE_STUDENTI_VOTI_TABLE = """
-            CREATE TABLE IF NOT EXISTS studentiVoti (
-                studente TEXT NOT NULL,
-                materia TEXT NOT NULL,
-                dataValutazione TEXT NOT NULL,
-                voto INTEGER NOT NULL,
-                PRIMARY KEY (studente, materia),
-                FOREIGN KEY (studente) REFERENCES user(username),
-                FOREIGN KEY (materia) REFERENCES materie(nome)
-            );
-            """;
-
-    // Metodo per creare la tabella materie nel database
-    private static final String CREATE_MATERIE_TABLE = """
-            CREATE TABLE IF NOT EXISTS materie (
-            	id INTEGER PRIMARY KEY AUTOINCREMENT,
-            	nome TEXT NOT NULL
-            );
-            """;
-
-    // Metodo per creare la tabella note nel database
-    private static final String CREATE_NOTE_TABLE = """
-            CREATE TABLE IF NOT EXISTS note (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                studente TEXT NOT NULL,
-                professore TEXT NOT NULL,
-                nota TEXT NOT NULL,
-                dataInserimento TEXT NOT NULL,
-                FOREIGN KEY (studente) REFERENCES user(username),
-                FOREIGN KEY (professore) REFERENCES user(username)
-            );
-            """;
-
-    // Metodo per creare la tabella compiti nel database
-    private static final String CREATE_COMPITI_TABLE = """
-            CREATE TABLE IF NOT EXISTS compiti (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                professore TEXT NOT NULL,
-                materia TEXT NOT NULL,
-                data TEXT NOT NULL,
-                descrizione TEXT NOT NULL,
-                classe TEXT NOT NULL,
-                FOREIGN KEY (professore) REFERENCES user(username),
-                FOREIGN KEY (materia) REFERENCES materie(nome)
-            );
-            """;
-
-    // Metodo per creare la tabella assenze nel database
-    private static final String CREATE_ASSENZE_TABLE = """
-            CREATE TABLE IF NOT EXISTS assenze (
-                studente TEXT NOT NULL,
-                giorno INTEGER NOT NULL,
-                mese INTEGER NOT NULL,
-                anno INTEGER NOT NULL,
-                motivazione TEXT DEFAULT 'Assenza non giustificata',
-                giustificata BOOLEAN DEFAULT 0,
-                FOREIGN KEY (studente) REFERENCES user(username),
-                PRIMARY KEY (studente, giorno, mese, anno)
-            );
-            """;
-
-    // Metodo per creare la tabella elaboratiCaricati nel database
-    private static final String CREATE_ELABORATI_TABLE = """
-            CREATE TABLE IF NOT EXISTS elaboratiCaricati (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                compitoId INTEGER NOT NULL,
-                studente TEXT NOT NULL,
-                data TEXT NOT NULL,
-                commento TEXT,
-                file BLOB,
-                FOREIGN KEY (compitoId) REFERENCES compiti(id),
-                FOREIGN KEY (studente) REFERENCES user(username)
-            );
-            """;
 
     // Metodo per ottenere la tipologia e la classe dell'utente in base al codice di iscrizione
     // Es. se il codice di iscrizione è 001 ritorna tipologia: studente, classe: 1A
@@ -871,7 +854,7 @@ public class Database implements ObservableSubject {
     public List<ElaboratoCaricato> getElaboratiCompito(int compitoId) {
         List<ElaboratoCaricato> elaborati = new ArrayList<>();
         String query = """
-                SELECT ec.studente, ec.data, ec.commento, ec.file,
+                SELECT ec.id, ec.studente, ec.data, ec.commento, ec.file,
                        c.id as compitoId, c.professore, c.materia, c.data as dataCompito, c.descrizione, c.classe
                 FROM elaboratiCaricati ec
                 JOIN compiti c ON ec.compitoId = c.id
@@ -891,16 +874,77 @@ public class Database implements ObservableSubject {
                         resultSet.getString("classe")
                 );
 
+                // IMPORTANTE: Ora leggiamo anche l'ID dell'elaborato se vogliamo supportare la cancellazione specifica
+                // Ma la classe ElaboratoCaricato attuale potrebbe non avere un campo ID.
+                // Controlliamo il modello ElaboratoCaricato.
+                // Se non c'è l'ID nel modello, dovremo aggiungerlo o gestirlo diversamente.
+                // Per ora assumiamo di dover aggiungere il metodo deleteElaborato che prende un ID.
+                // Modificherò il modello ElaboratoCaricato successivamente se necessario.
+
+                int id = resultSet.getInt("id");
                 String studente = resultSet.getString("studente");
                 String data = resultSet.getString("data");
                 String commento = resultSet.getString("commento");
                 byte[] file = resultSet.getBytes("file");
 
-                elaborati.add(new ElaboratoCaricato(compito, studente, data, commento, file));
+                // Nota: se il costruttore di ElaboratoCaricato non supporta l'ID, dovremmo aggiornarlo.
+                // Per ora uso il costruttore esistente, ma dovrò aggiornare il modello.
+                // Controllo il file ElaboratoCaricato.java prima di procedere con modifiche che richiedono l'ID nel modello.
+                elaborati.add(new ElaboratoCaricato(compito, studente, data, commento, file, id));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return elaborati;
+    }
+
+    public void deleteAssenza(String studente, int giorno, int mese, int anno) {
+        String query = "DELETE FROM assenze WHERE studente = ? AND giorno = ? AND mese = ? AND anno = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, studente);
+            statement.setInt(2, giorno);
+            statement.setInt(3, mese);
+            statement.setInt(4, anno);
+            statement.executeUpdate();
+            notifyObservers("ASSENZA_ELIMINATA");
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante l'eliminazione dell'assenza: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean hasElaboratiForCompito(int compitoId) {
+        String query = "SELECT COUNT(*) FROM elaboratiCaricati WHERE compitoId = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, compitoId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante il controllo degli elaborati: " + e.getMessage(), e);
+        }
+        return false;
+    }
+
+    public boolean deleteCompito(int compitoId) {
+        String query = "DELETE FROM compiti WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, compitoId);
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante l'eliminazione del compito: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean deleteElaborato(int elaboratoId) {
+        String query = "DELETE FROM elaboratiCaricati WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, elaboratoId);
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante l'eliminazione dell'elaborato: " + e.getMessage(), e);
+        }
     }
 }

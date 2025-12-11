@@ -79,7 +79,7 @@
             </center>
         </BorderPane>
         <BorderPane fx:id="caricaElaboratoPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                    minWidth="-Infinity" prefHeight="419.0" prefWidth="689.0" styleClass="mainPane">
+                    minWidth="-Infinity" prefHeight="543.0" prefWidth="793.0" styleClass="mainPane">
             <top>
                 <BorderPane prefHeight="118.0" prefWidth="600.0" styleClass="topPane" BorderPane.alignment="CENTER">
                     <bottom>
@@ -110,8 +110,14 @@
                     <children>
                         <Label fx:id="materiaLabeld" styleClass="materiaLabel" text="Materia"/>
                         <Label fx:id="argomentoLabel" styleClass="messageLabel" text="Argomento"/>
-                        <TextArea fx:id="commentoArea" prefHeight="113.0" prefWidth="511.0"
+                        <TextArea fx:id="commentoArea" prefHeight="48.0" prefWidth="615.0"
                                   promptText="Commento (opzionale)"/>
+                        <Label style="-fx-font-size: 16px;" styleClass="titolo" text="Elaborati caricati:"/>
+                        <ScrollPane fitToWidth="true" prefHeight="150.0">
+                            <content>
+                                <VBox fx:id="elaboratiContainer" alignment="TOP_CENTER" spacing="10"/>
+                            </content>
+                        </ScrollPane>
                     </children>
                     <BorderPane.margin>
                         <Insets left="20.0" top="10.0"/>
@@ -128,7 +134,7 @@
                 </Button>
             </bottom>
             <right>
-                <Button mnemonicParsing="false" styleClass="compitiPane" onAction="#caricaRisorsaClicked"
+                <Button mnemonicParsing="false" onAction="#caricaRisorsaClicked" styleClass="compitiPane"
                         BorderPane.alignment="CENTER">
                     <BorderPane.margin>
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>

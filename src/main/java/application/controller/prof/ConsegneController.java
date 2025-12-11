@@ -88,6 +88,10 @@ public class ConsegneController {
 
         // Quando si clicca sul compito, mostra/nasconde gli elaborati
         newBorderPane.setOnMouseClicked(event -> {
+            // Se il click è stato fatto col tasto destro, ignoriamo l'espansione (gestita dal ContextMenu)
+            if (event.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
+                return;
+            }
             if (!elaboratiBox.isVisible()) {
                 mostraElaborati(comp, elaboratiBox);
                 elaboratiBox.setVisible(true);
@@ -97,6 +101,29 @@ public class ConsegneController {
                 elaboratiBox.setManaged(false);
             }
         });
+
+        // Context Menu per eliminare il compito
+        javafx.scene.control.ContextMenu contextMenu = new javafx.scene.control.ContextMenu();
+        javafx.scene.control.MenuItem deleteItem = new javafx.scene.control.MenuItem("Elimina Compito");
+        deleteItem.setOnAction(e -> {
+            // Controlla se ci sono elaborati per questo compito
+            if (Database.getInstance().hasElaboratiForCompito(comp.id())) {
+                SceneHandler.getInstance().showWarning("Impossibile eliminare: ci sono elaborati consegnati.");
+            } else {
+                // Procedi con l'eliminazione
+                if (Database.getInstance().deleteCompito(comp.id())) {
+                    SceneHandler.getInstance().showInformation("Compito eliminato correttamente.");
+                    // Aggiorna la vista
+                    visualizzaCompiti();
+                } else {
+                    SceneHandler.getInstance().showWarning("Errore durante l'eliminazione del compito.");
+                }
+            }
+        });
+        contextMenu.getItems().add(deleteItem);
+
+        // Associa il ContextMenu al pannello del compito
+        newBorderPane.setOnContextMenuRequested(e -> contextMenu.show(newBorderPane, e.getScreenX(), e.getScreenY()));
 
         // Avvolge il compito e la lista elaborati in un VBox
         VBox container = new VBox(newBorderPane, elaboratiBox);

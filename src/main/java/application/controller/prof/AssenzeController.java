@@ -117,7 +117,7 @@ public class AssenzeController {
 
             // Coloriamo le celle corrispondenti alle assenze nello schema del calendario
             for (Assenza a : assenzeStudente) {
-                coloraCella(posizioneStudenti.get(s), a.giorno());
+                coloraCella(posizioneStudenti.get(s), a.giorno(), a.giustificata());
             }
         }
     }
@@ -186,7 +186,7 @@ public class AssenzeController {
             Database.getInstance().addAssenza(assenza);
 
             // Coloro la cella corrispondente alla nuova assenza nel calendario
-            coloraCella(posizione, giornoAssenza);
+            coloraCella(posizione, giornoAssenza, false);
 
             // Torno al pannello principale
             // (opzionale: in questo caso se voglio aggiungere più assenze di seguito
@@ -198,14 +198,30 @@ public class AssenzeController {
         }
     }
 
-    private void coloraCella(Integer posizione, Integer giorno) {
-        // Creo una nuova cella rossa per indicare l'assenza
-        Pane cellaRossa = new Pane(); // Usare un `Pane` vuoto per rappresentare la cella
-        cellaRossa.setStyle("-fx-background-color: red;"); // Imposta il colore di sfondo a rosso
+    private void coloraCella(Integer posizione, Integer giorno, boolean giustificata) {
+        // Usiamo sempre StackPane per centrare il testo
+        StackPane cellaColorata = new StackPane();
 
-        // Aggiungo la cella rossa alla griglia del calendario
-        // giorno + 1 perché la prima colonna è riservata ai nomi degli studenti
-        calendarioGrid.add(cellaRossa, giorno, posizione + 1);
+        // Label per il testo (G, A, o altro)
+        Label testoLabel = new Label();
+        // Stile base per il testo: bianco e grassetto
+        testoLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
+
+        if (giustificata) {
+            // --- CASO GIUSTIFICATA (BLU) ---
+            cellaColorata.setStyle("-fx-background-color: blue;");
+            testoLabel.setText("G"); // G per Giustificata
+        } else {
+            // --- CASO DA GIUSTIFICARE (ROSSO) ---
+            cellaColorata.setStyle("-fx-background-color: red;");
+            testoLabel.setText("A"); // A per Assenza (oppure usa "!")
+        }
+
+        // Aggiungo la label allo StackPane
+        cellaColorata.getChildren().add(testoLabel);
+
+        // Aggiungo la cella alla griglia
+        calendarioGrid.add(cellaColorata, giorno, posizione + 1);
     }
 
     // Torno alla home page del professore

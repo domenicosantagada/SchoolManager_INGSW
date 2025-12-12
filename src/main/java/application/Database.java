@@ -45,7 +45,6 @@ public class Database implements ObservableSubject {
             this.noteDAO = new NoteDAO();
             this.compitiDAO = new CompitiDAO();
 
-            System.out.println("Connessione al DB riuscita");
         } else {
             System.out.println("Connessione al DB fallita");
         }

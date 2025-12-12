@@ -205,6 +205,14 @@ public class Database implements ObservableSubject {
         return compitiDAO.deleteElaborato(elaboratoId);
     }
 
+    public List<String> getAllClassiNames() {
+        return schoolDAO.getAllClassiNames();
+    }
+
+    public boolean updateClasseUser(String username, String newClasse) {
+        return userDAO.updateClasseUser(username, newClasse);
+    }
+
     // === IMPLEMENTAZIONE OBSERVER PATTERN (Soggetto Concreto) ===
 
     @Override

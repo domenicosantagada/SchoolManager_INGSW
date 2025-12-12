@@ -104,4 +104,18 @@ public class SchoolDAO {
     public List<String> getAllMaterieIstituto() {
         return getMaterie();
     }
+
+    public List<String> getAllClassiNames() {
+        String query = "SELECT DISTINCT nomeClasse FROM codiciClassi WHERE tipologia = 'studente' ORDER BY nomeClasse";
+        List<String> classi = new ArrayList<>();
+        try (Statement statement = getConnection().createStatement()) {
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                classi.add(resultSet.getString("nomeClasse"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return classi;
+    }
 }

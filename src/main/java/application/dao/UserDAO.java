@@ -201,4 +201,16 @@ public class UserDAO {
         }
         return result;
     }
+
+    public boolean updateClasseUser(String username, String newClasse) {
+        String query = "UPDATE user SET classeAppartenenza = ? WHERE username = ?";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+            statement.setString(1, newClasse);
+            statement.setString(2, username);
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

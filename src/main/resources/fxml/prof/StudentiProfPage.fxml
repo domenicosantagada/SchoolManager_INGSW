@@ -21,9 +21,15 @@
                     <children>
                         <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
                             <children>
-                                
+
                                 <FontAwesomeIcon fx:id="pdfIcon" fill="#1976D2" iconName="FILE_PDF_ALT"
-                                                 onMouseClicked="#exportPDF" size="26"/>
+                                                 onMouseClicked="#exportPDF" size="26" styleClass="icon-hover">
+                                    <HBox.margin>
+                                        <Insets right="20.0"/>
+                                    </HBox.margin>
+                                </FontAwesomeIcon>
+                                <FontAwesomeIcon fx:id="csvIcon" fill="#1976D2" iconName="FILE_CODE_ALT"
+                                                 onMouseClicked="#exportCSV" size="26" styleClass="icon-hover"/>
                             </children>
                         </HBox>
                         <HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"

@@ -3,6 +3,7 @@ package application.controller.prof;
 import application.Database;
 import application.MessageDebug;
 import application.SceneHandler;
+import application.export.CSVClassExportStrategy;
 import application.export.ExportContext;
 import application.export.PDFClassExportStrategy;
 import application.model.Nota;
@@ -20,6 +21,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.GaussianBlur;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
@@ -35,7 +37,9 @@ public class StudentiController implements DataObserver {
     // Lista normale per la gestione interna degli studenti
     private List<StudenteTable> studentiList;
 
-    // Studente selezionato nella tabella
+    // Contesto per l'esportazione (Pattern Strategy)
+    private final ExportContext exportContext = ExportContext.getInstance();
+
     private StudenteTable studenteSelezionato;
 
     @FXML
@@ -86,21 +90,6 @@ public class StudentiController implements DataObserver {
     @FXML
     private TextField votoField;
 
-    // Metodo per esportare l'andamento della classe in PDF
-    // Utilizza il pattern Strategy per scegliere la strategia di esportazione
-    @FXML
-    private void exportPDF() {
-        // Implementazione del pattern Strategy
-        // Creiamo il contesto di esportazione
-        ExportContext exportContext = ExportContext.getInstance();
-
-        // Impostiamo la strategia concreta desiderata (PDF o CSV)
-        exportContext.setStrategy(new PDFClassExportStrategy());
-        //exportContext.setStrategy(new CSVClassExportStrategy());
-
-        // Eseguiamo l'esportazione
-        exportContext.exportAndamentoClasse(studentiList);
-    }
 
     // Metodo per mostrare il pannello di aggiunta nota
     @FXML
@@ -198,9 +187,10 @@ public class StudentiController implements DataObserver {
         mainPane.setEffect(null);
     }
 
-    // Metodo per tornare alla home page del professore
+    // Metodo per tornare alla home page del professore e rimuovere l'observer per evitare notifiche inutili
     @FXML
     private void backButtonClicked() throws IOException {
+        Database.getInstance().detach(this);
         SceneHandler.getInstance().setProfessorHomePage(SceneHandler.getInstance().getUsername());
     }
 
@@ -297,5 +287,25 @@ public class StudentiController implements DataObserver {
         aggiornaNumeroStudenti();
         aggiornaAndamentoClasse();
         setStudents(studentiList);
+    }
+
+    // Metodo per esportare l'andamento della classe in PDF
+    // Utilizza il pattern Strategy per scegliere la strategia di esportazione
+    @FXML
+    private void exportPDF() {
+        // Impostiamo la strategia concreta
+        exportContext.setStrategy(new PDFClassExportStrategy());
+
+        // Eseguiamo l'esportazione
+        exportContext.exportAndamentoClasse(studentiList);
+    }
+
+    @FXML
+    public void exportCSV(MouseEvent mouseEvent) {
+        // Impostiamo la strategia concreta
+        exportContext.setStrategy(new CSVClassExportStrategy());
+
+        // Eseguiamo l'esportazione
+        exportContext.exportAndamentoClasse(studentiList);
     }
 }

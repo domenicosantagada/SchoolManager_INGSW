@@ -131,6 +131,14 @@ public class Database implements ObservableSubject {
         System.out.println("Compito inserito correttamente");
         return compitiDAO.insertCompito(compito);
 
+//        boolean result = compitiDAO.insertCompito(compito);
+//        if (result) {
+//            // Aggiungi questa riga per notificare gli osservatori
+//            // Usiamo una stringa o un oggetto evento specifico
+//            notifyObservers("NUOVO_COMPITO");
+//        }
+//        return result;
+
     }
 
     public List<CompitoAssegnato> getCompitiClasse(String classe) {
@@ -229,8 +237,9 @@ public class Database implements ObservableSubject {
 
     @Override
     public void notifyObservers(Object event) {
-        // Notifica tutti gli observer registrati
-        for (DataObserver observer : observers) {
+        // Iteriamo su una copia per evitare ConcurrentModificationException
+        for (DataObserver observer : new ArrayList<>(observers)) {
+            System.out.println("Notifying observer: " + observer + " con evento: " + event);
             observer.update(event);
         }
     }

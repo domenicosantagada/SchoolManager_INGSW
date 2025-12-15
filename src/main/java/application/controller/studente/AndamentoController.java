@@ -55,9 +55,10 @@ public class AndamentoController implements DataObserver {
     private Label classeStudente;        // Classe dello studente
 
 
-    // Metodo per tornare alla home dello studente
+    // Metodo per tornare alla home dello studente e rimuovere l'observer per evitare notifiche inutili
     @FXML
     private void backButtonClicked() throws IOException {
+        Database.getInstance().detach(this);
         SceneHandler.getInstance().setStudentHomePage(studente);
     }
 

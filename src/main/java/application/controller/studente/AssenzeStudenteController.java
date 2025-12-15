@@ -122,6 +122,7 @@ public class AssenzeStudenteController implements DataObserver {
     // Metodo chiamato quando i dati nel database cambiano
     @Override
     public void update(Object event) {
+        System.out.println("AssenzeStudenteController received event: " + event);
         if (event instanceof String && "ASSENZA_GIUSTIFICATA".equals(event)) {
             // Aggiorna la tabella quando un'assenza viene giustificata (evento del pattern Observer)
             Platform.runLater(this::loadData);

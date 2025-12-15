@@ -47,8 +47,6 @@
     -fx-scale-y: 1.1;
 }
 
-
-
 .titolo {
     -fx-font-size: 20px;
     -fx-font-family: "Helvetica";
@@ -121,10 +119,13 @@
     -fx-padding: 10px 10px;
 }
 
-#pdfIcon:hover{
+.icon-hover:hover {
     -fx-cursor: hand;
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
+}
+.icon {
+    -fx-cursor: hand;
 }
 
 .textArea{

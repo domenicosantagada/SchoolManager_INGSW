@@ -45,6 +45,8 @@ public class CompitiController {
     // Metodo per tornare alla home dello studente
     @FXML
     public void backButtonClicked() throws IOException {
+//        // Deregistro questo controller come observer del database
+//        Database.getInstance().detach(this); // Buona pratica
         SceneHandler.getInstance().setStudentHomePage(SceneHandler.getInstance().getUsername());
     }
 
@@ -55,6 +57,9 @@ public class CompitiController {
         classe = Database.getInstance().getClasseUser(studente);
         compiti = Database.getInstance().getCompitiClasse(classe);
         classeLabel.setText(classe.toUpperCase());
+
+//        // Registro questo controller come observer del database
+//        Database.getInstance().attach(this);
 
         visualizzaCompiti();
     }
@@ -253,4 +258,19 @@ public class CompitiController {
             System.out.println("File scelto: " + selectedFile.getAbsolutePath());
         }
     }
+
+//    // 3. Implementa il metodo update
+//    @Override
+//    public void update(Object event) {
+//        // Controlla se l'evento è quello giusto
+//        if (event instanceof String && "NUOVO_COMPITO".equals(event)) {
+//            System.out.println("CompitiController ha ricevuto notifica di nuovo compito.");
+//            // Aggiorna la UI (Platform.runLater è necessario se l'aggiornamento arriva da un thread diverso)
+//            Platform.runLater(() -> {
+//                // Ricarica la lista dal DB
+//                compiti = Database.getInstance().getCompitiClasse(classe);
+//                visualizzaCompiti();
+//            });
+//        }
+//    }
 }

@@ -26,7 +26,7 @@
                                                  size="20" styleClass="iconaFreccia">
                                 </FontAwesomeIcon>
 
-                                <Label fx:id="monthLabel"/>
+                                <Label fx:id="monthLabel" styleClass="meseLabel"/>
 
                                 <FontAwesomeIcon fill="104d89" iconName="ARROW_RIGHT" onMouseClicked="#meseSuccessivo"
                                                  size="20" styleClass="iconaFreccia">

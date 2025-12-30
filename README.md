@@ -328,6 +328,50 @@ Questa sezione consente allo studente di consultare i **provvedimenti disciplina
 1.  **Build del progetto:** `mvn clean install`
 2.  **Esecuzione:** `mvn javafx:run`
 
+👨‍🏫 Docenti
+| Username | Password |
+| -------- | -------- |
+| prof1    | 0000     |
+| prof2    | 0000     |
+| prof3    | 0000     |
+| prof4    | 0000     |
+| prof5    | 0000     |
+| prof6    | 0000     |
+| prof7    | 0000     |
+| prof8    | 0000     |
+| prof9    | 0000     |
+| prof10   | 0000     |
+
+🎓 Studenti
+| Username | Classe | Password |
+| -------- | ------ | -------- |
+| stud1    | 1A     | 0000     |
+| stud2    | 1A     | 0000     |
+| stud3    | 1A     | 0000     |
+| stud4    | 1A     | 0000     |
+| stud5    | 1A     | 0000     |
+| stud6    | 2A     | 0000     |
+| stud7    | 2A     | 0000     |
+| stud8    | 2A     | 0000     |
+| stud9    | 2A     | 0000     |
+| stud10   | 2A     | 0000     |
+| stud11   | 3A     | 0000     |
+| stud12   | 3A     | 0000     |
+| stud13   | 3A     | 0000     |
+| stud14   | 3A     | 0000     |
+| stud15   | 3A     | 0000     |
+| stud16   | 4A     | 0000     |
+| stud17   | 4A     | 0000     |
+| stud18   | 4A     | 0000     |
+| stud19   | 4A     | 0000     |
+| stud20   | 4A     | 0000     |
+| stud21   | 5A     | 0000     |
+| stud22   | 5A     | 0000     |
+| stud23   | 5A     | 0000     |
+| stud24   | 5A     | 0000     |
+| stud25   | 5A     | 0000     |
+
+
 ---
 
 ## 🧩 Architettura e Design Pattern

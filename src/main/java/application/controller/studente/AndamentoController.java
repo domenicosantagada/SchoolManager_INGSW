@@ -1,12 +1,14 @@
 package application.controller.studente;
 
-import application.Database;
-import application.SceneHandler;
+import application.persistence.Database;
+import application.persistence.DatabaseEvent;
+import application.persistence.DatabaseEventType;
 import application.exportStrategy.CSVExportStrategy;
 import application.exportStrategy.ExportContext;
 import application.exportStrategy.PDFExportStrategy;
 import application.model.ValutazioneStudente;
 import application.observer.Observer;
+import application.view.SceneHandler;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -204,17 +206,26 @@ public class AndamentoController implements Observer {
 
     // Metodo chiamato quando i dati dello studente vengono aggiornati (Observer Pattern)
     @Override
-    public void update(Object event) {
-        // Aggiorna solo se la notifica riguarda lo studente loggato
-        if (event instanceof String && event.equals(studente)) {
+    public void update(DatabaseEvent event) {
+        // Verifichiamo se l'evento riguarda un aggiornamento dei voti o l'inserimento di una nota
+        if (event.type() == DatabaseEventType.VOTO_AGGIORNATO || event.type() == DatabaseEventType.NOTA_INSERITA) {
 
-            // Ricarica i voti aggiornati
-            voti = Database.getInstance().getVotiStudente(studente);
+            // Verifichiamo se l'evento riguarda lo studente attualmente loggato
+            if (event.data() != null && event.data().equals(studente)) {
 
-            // Aggiorna grafico, lista voti e riepilogo
-            updateChart(voti);
-            updateListVoti(voti);
-            updateRiepilogo(voti);
+                // Eseguiamo l'aggiornamento della UI sul thread di JavaFX
+                javafx.application.Platform.runLater(() -> {
+                    // Ricarica i voti aggiornati dal database
+                    voti = Database.getInstance().getVotiStudente(studente);
+
+                    // Aggiorna i componenti della UI
+                    updateChart(voti);
+                    updateListVoti(voti);
+                    updateRiepilogo(voti);
+
+                    System.out.println("Andamento ricaricato per lo studente: " + studente);
+                });
+            }
         }
     }
 

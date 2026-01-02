@@ -1,6 +1,8 @@
 package application.observer;
 
 
+import application.persistence.DatabaseEvent;
+
 // Interfaccia Subject: Definisce i metodi per gestire gli observer.
 public interface Subject {
 
@@ -11,5 +13,5 @@ public interface Subject {
     void detach(Observer observer);
 
     // metodo per notificare tutti gli observer di un cambiamento
-    void notifyObservers(Object event);
+    void notifyObservers(DatabaseEvent event);
 }

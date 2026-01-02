@@ -1,10 +1,10 @@
 package application.controller.studente;
 
-import application.Database;
-import application.SceneHandler;
+import application.persistence.Database;
+import application.persistence.DatabaseEvent;
 import application.model.Assenza;
 import application.observer.Observer;
-import javafx.application.Platform;
+import application.view.SceneHandler;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -121,11 +121,24 @@ public class AssenzeStudenteController implements Observer {
 
     // Metodo chiamato quando i dati nel database cambiano
     @Override
-    public void update(Object event) {
-        System.out.println("AssenzeStudenteController received event: " + event);
-        if (event instanceof String && "ASSENZA_GIUSTIFICATA".equals(event)) {
-            // Aggiorna la tabella quando un'assenza viene giustificata (evento del pattern Observer)
-            Platform.runLater(this::loadData);
+    public void update(DatabaseEvent event) {
+        // Gestiamo i vari tipi di eventi relativi alle assenze
+        switch (event.type()) {
+            case ASSENZA_AGGIUNTA:
+            case ASSENZA_GIUSTIFICATA:
+            case ASSENZA_ELIMINATA:
+
+                // Poiché il Database ora passa 'null', non filtriamo più per studente.
+                // La tabella verrà ricaricata ogni volta che avviene una modifica alle assenze.
+                System.out.println("Notifica ricevuta: " + event.type() + ". Aggiornamento tabella in corso...");
+
+                // Eseguiamo l'aggiornamento della UI sul thread di JavaFX
+                // Il metodo loadData() recupera internamente lo username corretto dal SceneHandler
+                javafx.application.Platform.runLater(this::loadData);
+                break;
+
+            default:
+                break;
         }
     }
 }

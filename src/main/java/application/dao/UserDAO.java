@@ -1,9 +1,9 @@
 package application.dao;
 
-import application.BCryptService;
-import application.DatabaseConnection;
+import application.persistence.DatabaseConnection;
 import application.model.Professore;
 import application.model.Studente;
+import application.utility.BCryptService;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

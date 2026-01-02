@@ -1,6 +1,6 @@
 package application.dao;
 
-import application.DatabaseConnection;
+import application.persistence.DatabaseConnection;
 import application.model.TipologiaClasse;
 
 import java.sql.*;

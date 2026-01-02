@@ -1,7 +1,7 @@
 package application.controller.prof;
 
-import application.Database;
-import application.SceneHandler;
+import application.persistence.Database;
+import application.view.SceneHandler;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;

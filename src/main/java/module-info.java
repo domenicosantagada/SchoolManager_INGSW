@@ -23,4 +23,10 @@ module com.example.registroelettronico {
     opens application.exportStrategy to javafx.fxml;
     exports application.observer;
     opens application.observer to javafx.fxml;
+    exports application.view;
+    opens application.view to javafx.fxml;
+    exports application.utility;
+    opens application.utility to javafx.fxml;
+    exports application.persistence;
+    opens application.persistence to javafx.fxml;
 }

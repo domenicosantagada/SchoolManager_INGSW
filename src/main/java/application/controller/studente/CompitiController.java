@@ -1,9 +1,9 @@
 package application.controller.studente;
 
-import application.Database;
-import application.SceneHandler;
+import application.persistence.Database;
 import application.model.CompitoAssegnato;
 import application.model.ElaboratoCaricato;
+import application.view.SceneHandler;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;

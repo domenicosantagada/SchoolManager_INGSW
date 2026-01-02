@@ -1,9 +1,13 @@
 package application.controller.prof;
 
-import application.Database;
-import application.MessageDebug;
-import application.SceneHandler;
+import application.persistence.Database;
+import application.persistence.DatabaseEvent;
+import application.persistence.DatabaseEventType;
 import application.model.CompitoAssegnato;
+import application.observer.Observer;
+import application.utility.MessageDebug;
+import application.view.SceneHandler;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -13,7 +17,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class CompitiController {
+public class CompitiController implements Observer {
 
     @FXML
     private Label classLabel;
@@ -21,47 +25,35 @@ public class CompitiController {
     @FXML
     private TextArea compitiAssegnati;
 
-    // Variabili per memorizzare la materia insegnata dal docente e la classe assegnata
     private String materia;
     private String classe;
 
-    // Torno alla home page del professore
     @FXML
     public void backButtonClicked() throws IOException {
+        // Disaccoppiamento dell'observer prima di lasciare la pagina per evitare memory leak
+        Database.getInstance().detach(this);
         SceneHandler.getInstance().setProfessorHomePage(SceneHandler.getInstance().getUsername());
     }
 
-    // Gestisce l'evento di invio dei compiti quando viene premuto il pulsante dedicato
     @FXML
     public void inviaCompiti(ActionEvent actionEvent) throws IOException {
-        // Controllo se il campo di testo dei compiti è vuoto o contiene solo spazi
         if (compitiAssegnati.getText().trim().isEmpty()) {
-            // Se vuoto, mostro un avviso all'utente e pulisco il campo
             SceneHandler.getInstance().showWarning(MessageDebug.CAMPS_NOT_EMPTY);
             compitiAssegnati.setText("");
         } else {
-            // Creo un nuovo oggetto CompitoAssegnato con i dati correnti:
-            // username del docente, materia, data odierna formattata, descrizione e classe
             CompitoAssegnato compito = new CompitoAssegnato(
-                    -1, // ID non ancora assegnato
+                    -1,
                     SceneHandler.getInstance().getUsername(),
                     materia,
-                    LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString(),
-                    compitiAssegnati.getText().toUpperCase(), // Salvo il testo in maiuscolo per uniformità
+                    LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    compitiAssegnati.getText().toUpperCase(),
                     classe);
 
-            // Tento di inserire il compito nel database
             if (Database.getInstance().insertCompito(compito)) {
-                // Se l'inserimento ha successo, mostro una conferma, pulisco il campo e torno alla home page
                 SceneHandler.getInstance().showInformation(MessageDebug.COMPITO_INSERTED);
                 compitiAssegnati.setText("");
-
-                // Torno alla home page del professore prima -> SceneHandler.getInstance().setProfessorHomePage(SceneHandler.getInstance().getUsername());
-                // posso richiamare, invece, la funzione backButtonClicked per tornare alla home page
                 backButtonClicked();
-
             } else {
-                // Se l'inserimento fallisce, mostro un messaggio di errore
                 SceneHandler.getInstance().showWarning(MessageDebug.COMPITO_NOT_INSERTED);
             }
         }
@@ -69,13 +61,23 @@ public class CompitiController {
 
     @FXML
     public void initialize() {
-        // Recupero la classe assegnata al docente attualmente loggato tramite il Database
+        // Registrazione del controller come observer nel Database
+        Database.getInstance().attach(this);
+
         classe = Database.getInstance().getClasseUser(SceneHandler.getInstance().getUsername());
-
-        // Imposto il testo della label con il nome della classe recuperata
         classLabel.setText(classe);
-
-        // Recupero la materia insegnata dal docente per utilizzarla nella creazione dei compiti
         materia = Database.getInstance().getMateriaProf(SceneHandler.getInstance().getUsername());
+    }
+
+    @Override
+    public void update(DatabaseEvent event) {
+        // Logica per reagire ai cambiamenti dei dati
+        // Anche se questa pagina è di solo inserimento, è buona norma gestire gli eventi correlati
+        if (event.type() == DatabaseEventType.NUOVO_COMPITO) {
+            Platform.runLater(() -> {
+                System.out.println("Notifica: Un nuovo compito è stato inserito per la classe " + event.data());
+                // Qui si potrebbe aggiungere logica per aggiornare una eventuale lista di compiti già inviati
+            });
+        }
     }
 }

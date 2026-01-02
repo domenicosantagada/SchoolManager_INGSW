@@ -1,10 +1,13 @@
 package application.controller.prof;
 
-import application.Database;
-import application.MessageDebug;
-import application.SceneHandler;
 import application.model.Assenza;
 import application.model.StudenteTable;
+import application.observer.Observer;
+import application.persistence.Database;
+import application.persistence.DatabaseEvent;
+import application.utility.MessageDebug;
+import application.view.SceneHandler;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -19,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AssenzeController {
+public class AssenzeController implements Observer {
 
     @FXML
     private ChoiceBox studentChoiceBox;
@@ -58,6 +61,9 @@ public class AssenzeController {
 
     @FXML
     public void initialize() {
+        // Registra questo controller come observer del database per ricevere notifiche sui cambiamenti
+        Database.getInstance().attach(this);
+
         // Viene aggiunto un "listener" (un osservatore) alla proprietà scene della classLabel.
         // Poiché al momento dell'esecuzione di initialize la Scene (la finestra) potrebbe non
         // essere ancora completamente formata, questo codice attende che la scena venga assegnata.
@@ -216,6 +222,7 @@ public class AssenzeController {
             // --- CASO DA GIUSTIFICARE (ROSSO) ---
             cellaColorata.setStyle("-fx-background-color: red;");
             testoLabel.setText("A"); // A per Assenza
+
         }
 
         // Aggiungo la label allo StackPane
@@ -242,9 +249,9 @@ public class AssenzeController {
         calendarGrid.add(cellaColorata, giorno, posizione + 1);
     }
 
-    // Torno alla home page del professore
     @FXML
     private void backButtonClicked() throws IOException {
+        Database.getInstance().detach(this); // Aggiungi questa riga!
         SceneHandler.getInstance().setProfessorHomePage(prof);
     }
 
@@ -371,5 +378,26 @@ public class AssenzeController {
         populateCalendar();
         // Aggiorniamo le assenze nel calendario
         loadAndRenderAbsences();
+    }
+
+    @Override
+    public void update(DatabaseEvent event) {
+        // Gestiamo gli eventi relativi alle assenze
+        switch (event.type()) {
+            case ASSENZA_AGGIUNTA:
+            case ASSENZA_GIUSTIFICATA:
+            case ASSENZA_ELIMINATA:
+                // Eseguiamo l'aggiornamento della UI sul thread JavaFX
+                Platform.runLater(() -> {
+                    // Puliamo e ridisegniamo solo gli indicatori delle assenze
+                    // o l'intero calendario se preferisci una gestione più semplice
+                    populateCalendar();
+                    loadAndRenderAbsences();
+                    System.out.println("Calendario docente aggiornato via Observer: " + event.type());
+                });
+                break;
+            default:
+                break;
+        }
     }
 }

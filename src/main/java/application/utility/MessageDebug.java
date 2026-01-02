@@ -1,4 +1,4 @@
-package application;
+package application.utility;
 
 public class MessageDebug {
     public static final String CAMPS_NOT_EMPTY = "Tutti i campi sono obbligatori.";

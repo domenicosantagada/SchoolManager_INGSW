@@ -1,8 +1,8 @@
 package application.controller.studente;
 
-import application.Database;
-import application.SceneHandler;
+import application.persistence.Database;
 import application.model.Nota;
+import application.view.SceneHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;

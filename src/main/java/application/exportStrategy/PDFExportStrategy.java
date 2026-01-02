@@ -1,8 +1,8 @@
 package application.exportStrategy;
 
-import application.Database;
-import application.SceneHandler;
+import application.persistence.Database;
 import application.model.ValutazioneStudente;
+import application.view.SceneHandler;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;

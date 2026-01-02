@@ -1,15 +1,17 @@
 package application.controller.prof;
 
-import application.Database;
-import application.MessageDebug;
-import application.SceneHandler;
+import application.persistence.Database;
+import application.persistence.DatabaseEvent;
+import application.persistence.DatabaseEventType;
 import application.exportStrategy.CSVClassExportStrategy;
 import application.exportStrategy.ExportContext;
 import application.exportStrategy.PDFClassExportStrategy;
 import application.model.Nota;
 import application.model.StudenteTable;
 import application.model.ValutazioneStudente;
-import application.observer.DataObserver;
+import application.observer.Observer;
+import application.utility.MessageDebug;
+import application.view.SceneHandler;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -29,7 +31,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class StudentiController implements DataObserver {
+public class StudentiController implements Observer {
 
     // Lista osservabile per la tabella degli studenti
     private ObservableList<StudenteTable> studenti = FXCollections.observableArrayList();
@@ -275,18 +277,30 @@ public class StudentiController implements DataObserver {
 
     // Metodo chiamato quando i dati osservati cambiano (Pattern Observer)
     @Override
-    public void update(Object event) {
+    public void update(DatabaseEvent event) {
+        // Questo controller deve aggiornare la lista se cambiano i voti o le note,
+        // poiché influenzano le medie e l'andamento visualizzato nella tabella.
+        if (event.type() == DatabaseEventType.VOTO_AGGIORNATO ||
+                event.type() == DatabaseEventType.NOTA_INSERITA) {
 
-        // Ricarica i dati dal Database
-        studentiList = Database.getInstance().getStudentiClasse(
-                classeLabel.getText(),
-                Database.getInstance().getMateriaProf(SceneHandler.getInstance().getUsername())
-        );
+            System.out.println("StudentiController: ricevuto evento " + event.type());
 
-        // Aggiorna le statistiche e la tabella
-        aggiornaNumeroStudenti();
-        aggiornaAndamentoClasse();
-        setStudents(studentiList);
+            // Eseguiamo l'aggiornamento della UI sul thread dedicato di JavaFX
+            javafx.application.Platform.runLater(() -> {
+                // Ricarica i dati aggiornati dal Database
+                studentiList = Database.getInstance().getStudentiClasse(
+                        classeLabel.getText(),
+                        Database.getInstance().getMateriaProf(SceneHandler.getInstance().getUsername())
+                );
+
+                // Aggiorna le statistiche della classe e la tabella con i nuovi dati
+                aggiornaNumeroStudenti();
+                aggiornaAndamentoClasse();
+                setStudents(studentiList);
+
+                System.out.println("Lista studenti e statistiche aggiornate correttamente.");
+            });
+        }
     }
 
     // Metodo per esportare l'andamento della classe in PDF

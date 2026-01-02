@@ -1,7 +1,7 @@
 package application.controller.studente;
 
-import application.Database;
-import application.SceneHandler;
+import application.persistence.Database;
+import application.view.SceneHandler;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

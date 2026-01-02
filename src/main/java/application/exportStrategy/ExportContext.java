@@ -1,9 +1,9 @@
 package application.exportStrategy;
 
-import application.Database;
-import application.SceneHandler;
+import application.persistence.Database;
 import application.model.StudenteTable;
 import application.model.ValutazioneStudente;
+import application.view.SceneHandler;
 import javafx.stage.FileChooser;
 
 import java.io.File;

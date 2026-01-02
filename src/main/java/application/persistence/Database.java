@@ -1,20 +1,22 @@
-package application;
+package application.persistence;
 
 import application.dao.*;
 import application.model.*;
-import application.observer.DataObserver;
-import application.observer.ObservableSubject;
+import application.observer.Observer;
+import application.observer.Subject;
 
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Database implements ObservableSubject {
+// Classe Database: Singleton che gestisce la connessione al database
+// e funge da soggetto nell'Observer Pattern
+public class Database implements Subject {
 
     // Singleton
     private static final Database instance = new Database();
     // Lista di observer registrati che verranno notificati in caso di cambiamenti
-    private final List<DataObserver> observers = new ArrayList<>();
+    private final List<Observer> observers = new ArrayList<>();
     // DAOs
     private UserDAO userDAO;
     private SchoolDAO schoolDAO;
@@ -114,7 +116,7 @@ public class Database implements ObservableSubject {
     public boolean insertNota(Nota nota) {
         boolean result = noteDAO.insertNota(nota);
         if (result) {
-            notifyObservers(nota.studente());
+            notifyObservers(new DatabaseEvent(DatabaseEventType.NOTA_INSERITA, nota.studente()));
         }
         return result;
     }
@@ -122,38 +124,27 @@ public class Database implements ObservableSubject {
     public boolean updateVoto(ValutazioneStudente valutazione) {
         boolean result = votiDAO.updateVoto(valutazione);
         if (result) {
-            notifyObservers(valutazione.studente());
+            // Notifica specifica con tipo e dati (lo studente coinvolto)
+            notifyObservers(new DatabaseEvent(DatabaseEventType.VOTO_AGGIORNATO, valutazione.studente()));
         }
         return result;
     }
 
     public boolean insertCompito(CompitoAssegnato compito) {
-        System.out.println("Compito inserito correttamente");
-        return compitiDAO.insertCompito(compito);
-
-//        boolean result = compitiDAO.insertCompito(compito);
-//        if (result) {
-//            // Aggiungi questa riga per notificare gli osservatori
-//            // Usiamo una stringa o un oggetto evento specifico
-//            notifyObservers("NUOVO_COMPITO");
-//        }
-//        return result;
-
+        boolean result = compitiDAO.insertCompito(compito);
+        if (result) {
+            // Notifica per nuovo compito assegnato alla classe
+            notifyObservers(new DatabaseEvent(DatabaseEventType.NUOVO_COMPITO, compito.classe()));
+        }
+        return result;
     }
 
     public List<CompitoAssegnato> getCompitiClasse(String classe) {
-
         return compitiDAO.getCompitiClasse(classe);
     }
 
     public List<ValutazioneStudente> getVotiStudente(String studente) {
-
         return votiDAO.getVotiStudente(studente);
-    }
-
-    public void addAssenza(Assenza assenza) {
-        assenzeDAO.addAssenza(assenza);
-        notifyObservers("ASSENZA_AGGIUNTA");
     }
 
     public List<Assenza> getAssenzeStudente(String studente) {
@@ -166,10 +157,22 @@ public class Database implements ObservableSubject {
         return assenzeDAO.getAssenzeStudente(studente, m);
     }
 
-    public void justifyAssenza(Assenza assenza, String motivazione) {
+    public void addAssenza(Assenza assenza) {
+        assenzeDAO.addAssenza(assenza);
+        // Notifica aggiunta assenza passando lo username dello studente
+        notifyObservers(new DatabaseEvent(DatabaseEventType.ASSENZA_AGGIUNTA, null));
+    }
 
+    public void justifyAssenza(Assenza assenza, String motivazione) {
         assenzeDAO.justifyAssenza(assenza, motivazione);
-        notifyObservers("ASSENZA_GIUSTIFICATA");
+        // Notifica giustificazione assenza
+        notifyObservers(new DatabaseEvent(DatabaseEventType.ASSENZA_GIUSTIFICATA, null));
+    }
+
+    public void deleteAssenza(String studente, int giorno, int mese, int anno) {
+        assenzeDAO.deleteAssenza(studente, giorno, mese, anno);
+        // Notifica eliminazione assenza
+        notifyObservers(new DatabaseEvent(DatabaseEventType.ASSENZA_ELIMINATA, null));
     }
 
     public List<Nota> getNoteStudente(String studente) {
@@ -192,11 +195,6 @@ public class Database implements ObservableSubject {
         return compitiDAO.getElaboratiCompito(compitoId);
     }
 
-    public void deleteAssenza(String studente, int giorno, int mese, int anno) {
-
-        assenzeDAO.deleteAssenza(studente, giorno, mese, anno);
-        notifyObservers("ASSENZA_ELIMINATA");
-    }
 
     public boolean hasElaboratiForCompito(int compitoId) {
 
@@ -225,7 +223,7 @@ public class Database implements ObservableSubject {
 
     // Registra un observer alla lista
     @Override
-    public void attach(DataObserver observer) {
+    public void attach(Observer observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
         }
@@ -233,17 +231,17 @@ public class Database implements ObservableSubject {
 
     // Rimuove un observer dalla lista
     @Override
-    public void detach(DataObserver observer) {
+    public void detach(Observer observer) {
         observers.remove(observer);
     }
 
     // Notifica tutti gli observer registrati di un evento
     @Override
-    public void notifyObservers(Object event) {
-        // Iteriamo su una copia per evitare ConcurrentModificationException
-        for (DataObserver observer : new ArrayList<>(observers)) {
-            System.out.println("Notifying observer: " + observer + " con evento: " + event);
-            observer.update(event);
+    public void notifyObservers(DatabaseEvent event) {
+        // Firma aggiornata per accettare DatabaseEvent
+        for (Observer observer : new ArrayList<>(observers)) {
+            System.out.println("Notificando observer: " + observer + " | Evento: " + event.type());
+            observer.update(event); // Chiamata al metodo update dell'interfaccia
         }
     }
 }

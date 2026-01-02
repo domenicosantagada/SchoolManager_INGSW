@@ -1,6 +1,7 @@
-package application;
+package application.persistence;
 
 import application.model.*;
+import application.utility.BCryptService;
 
 import java.io.File;
 import java.sql.Connection;

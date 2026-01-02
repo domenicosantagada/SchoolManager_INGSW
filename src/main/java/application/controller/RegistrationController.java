@@ -1,13 +1,13 @@
 package application.controller;
 
-import application.BCryptService;
-import application.Database;
-import application.MessageDebug;
-import application.SceneHandler;
+import application.persistence.Database;
 import application.model.Professore;
 import application.model.Studente;
 import application.model.TipologiaClasse;
 import application.model.User;
+import application.utility.BCryptService;
+import application.utility.MessageDebug;
+import application.view.SceneHandler;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;

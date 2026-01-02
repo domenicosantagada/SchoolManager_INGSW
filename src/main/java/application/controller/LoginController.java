@@ -1,8 +1,8 @@
 package application.controller;
 
-import application.Database;
-import application.MessageDebug;
-import application.SceneHandler;
+import application.persistence.Database;
+import application.utility.MessageDebug;
+import application.view.SceneHandler;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;

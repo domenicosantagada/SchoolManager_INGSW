@@ -3,7 +3,7 @@ package application.controller.studente;
 import application.Database;
 import application.SceneHandler;
 import application.model.Assenza;
-import application.observer.DataObserver;
+import application.observer.Observer;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
-public class AssenzeStudenteController implements DataObserver {
+public class AssenzeStudenteController implements Observer {
     @FXML
     private BorderPane mainPane;
     @FXML

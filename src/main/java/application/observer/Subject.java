@@ -1,16 +1,14 @@
 package application.observer;
 
 
-/**
- * Interfaccia Subject: Definisce i metodi per gestire (registrare, de-registrare) gli Observer.
- */
-public interface ObservableSubject {
+// Interfaccia Subject: Definisce i metodi per gestire gli observer.
+public interface Subject {
 
     // metodo per registrare un observer
-    void attach(DataObserver observer);
+    void attach(Observer observer);
 
     // metodo per de-registrare un observer
-    void detach(DataObserver observer);
+    void detach(Observer observer);
 
     // metodo per notificare tutti gli observer di un cambiamento
     void notifyObservers(Object event);

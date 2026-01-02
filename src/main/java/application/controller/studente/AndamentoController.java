@@ -6,7 +6,7 @@ import application.exportStrategy.CSVExportStrategy;
 import application.exportStrategy.ExportContext;
 import application.exportStrategy.PDFExportStrategy;
 import application.model.ValutazioneStudente;
-import application.observer.DataObserver;
+import application.observer.Observer;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AndamentoController implements DataObserver {
+public class AndamentoController implements Observer {
 
     // Elenco delle materie dell'istituto
     private List<String> materie = new ArrayList<>();

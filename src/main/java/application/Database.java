@@ -2,19 +2,21 @@ package application;
 
 import application.dao.*;
 import application.model.*;
-import application.observer.DataObserver;
-import application.observer.ObservableSubject;
+import application.observer.Observer;
+import application.observer.Subject;
 
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Database implements ObservableSubject {
+// Classe Database: Singleton che gestisce la connessione al database
+// e funge da soggetto nell'Observer Pattern
+public class Database implements Subject {
 
     // Singleton
     private static final Database instance = new Database();
     // Lista di observer registrati che verranno notificati in caso di cambiamenti
-    private final List<DataObserver> observers = new ArrayList<>();
+    private final List<Observer> observers = new ArrayList<>();
     // DAOs
     private UserDAO userDAO;
     private SchoolDAO schoolDAO;
@@ -225,7 +227,7 @@ public class Database implements ObservableSubject {
 
     // Registra un observer alla lista
     @Override
-    public void attach(DataObserver observer) {
+    public void attach(Observer observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
         }
@@ -233,7 +235,7 @@ public class Database implements ObservableSubject {
 
     // Rimuove un observer dalla lista
     @Override
-    public void detach(DataObserver observer) {
+    public void detach(Observer observer) {
         observers.remove(observer);
     }
 
@@ -241,7 +243,7 @@ public class Database implements ObservableSubject {
     @Override
     public void notifyObservers(Object event) {
         // Iteriamo su una copia per evitare ConcurrentModificationException
-        for (DataObserver observer : new ArrayList<>(observers)) {
+        for (Observer observer : new ArrayList<>(observers)) {
             System.out.println("Notifying observer: " + observer + " con evento: " + event);
             observer.update(event);
         }

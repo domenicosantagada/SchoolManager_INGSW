@@ -9,7 +9,7 @@ import application.exportStrategy.PDFClassExportStrategy;
 import application.model.Nota;
 import application.model.StudenteTable;
 import application.model.ValutazioneStudente;
-import application.observer.DataObserver;
+import application.observer.Observer;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -29,7 +29,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class StudentiController implements DataObserver {
+public class StudentiController implements Observer {
 
     // Lista osservabile per la tabella degli studenti
     private ObservableList<StudenteTable> studenti = FXCollections.observableArrayList();

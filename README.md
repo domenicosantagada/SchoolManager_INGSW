@@ -1,28 +1,15 @@
 ## 🚀 Guida all'Avvio
-<<<<<<< HEAD
-1.  **Build del progetto:** `mvn clean install`
-2.  **Esecuzione:** `mvn javafx:run`
-=======
 
 1. **Build del progetto:** `mvn clean install`
 2. **Esecuzione:** `mvn javafx:run`
->>>>>>> develop
+
+
+1. **Build del progetto:** `mvn clean install`
+2. **Esecuzione:** `mvn javafx:run`
 
 👨‍🏫 Docenti
 | Username | Password |
 | -------- | -------- |
-<<<<<<< HEAD
-| prof1    | 0000     |
-| prof2    | 0000     |
-| prof3    | 0000     |
-| prof4    | 0000     |
-| prof5    | 0000     |
-| prof6    | 0000     |
-| prof7    | 0000     |
-| prof8    | 0000     |
-| prof9    | 0000     |
-| prof10   | 0000     |
-=======
 | prof1 | 0000 |
 | prof2 | 0000 |
 | prof3 | 0000 |
@@ -33,23 +20,20 @@
 | prof8 | 0000 |
 | prof9 | 0000 |
 | prof10 | 0000 |
->>>>>>> develop
+| prof1 | 0000 |
+| prof2 | 0000 |
+| prof3 | 0000 |
+| prof4 | 0000 |
+| prof5 | 0000 |
+| prof6 | 0000 |
+| prof7 | 0000 |
+| prof8 | 0000 |
+| prof9 | 0000 |
+| prof10 | 0000 |
 
 🎓 Studenti
 | Username | Classe | Password |
 | -------- | ------ | -------- |
-<<<<<<< HEAD
-| stud1    | 1A     | 0000     |
-| stud2    | 1A     | 0000     |
-| stud3    | 1A     | 0000     |
-| stud4    | 1A     | 0000     |
-| stud5    | 1A     | 0000     |
-| stud6    | 2A     | 0000     |
-| stud7    | 2A     | 0000     |
-| stud8    | 2A     | 0000     |
-| stud9    | 2A     | 0000     |
-| stud10   | 2A     | 0000     |
-=======
 | stud1 | 1A | 0000 |
 | stud2 | 1A | 0000 |
 | stud3 | 1A | 0000 |
@@ -60,7 +44,16 @@
 | stud8 | 2A | 0000 |
 | stud9 | 2A | 0000 |
 | stud10 | 2A | 0000 |
->>>>>>> develop
+| stud1 | 1A | 0000 |
+| stud2 | 1A | 0000 |
+| stud3 | 1A | 0000 |
+| stud4 | 1A | 0000 |
+| stud5 | 1A | 0000 |
+| stud6 | 2A | 0000 |
+| stud7 | 2A | 0000 |
+| stud8 | 2A | 0000 |
+| stud9 | 2A | 0000 |
+| stud10 | 2A | 0000 |
 
 ---
 

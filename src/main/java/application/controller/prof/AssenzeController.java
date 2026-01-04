@@ -25,7 +25,7 @@ import java.util.Map;
 public class AssenzeController implements Observer {
 
     @FXML
-    private ChoiceBox studentChoiceBox;
+    private ChoiceBox<String> studentChoiceBox;
 
     @FXML
     private DatePicker absenceDatePicker;

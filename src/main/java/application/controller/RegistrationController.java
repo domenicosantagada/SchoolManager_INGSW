@@ -1,10 +1,10 @@
 package application.controller;
 
-import application.persistence.Database;
 import application.model.Professore;
 import application.model.Studente;
 import application.model.TipologiaClasse;
 import application.model.User;
+import application.persistence.Database;
 import application.utility.BCryptService;
 import application.utility.MessageDebug;
 import application.view.SceneHandler;
@@ -29,7 +29,7 @@ public class RegistrationController {
     public static final String STUDENTTYPE = "studente";
 
     @FXML
-    private ChoiceBox materiaChoiceBox; // lista materie, visibile solo per i prof
+    private ChoiceBox<String> materiaChoiceBox; // lista materie, visibile solo per i prof
     @FXML
     private Button registerButton; // pulsante di registrazione
     @FXML

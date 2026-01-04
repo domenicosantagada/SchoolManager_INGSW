@@ -25,7 +25,11 @@ L'applicazione permette di accedere in due modi:
    | prof9 | 0000 |
    | prof10 | 0000 |
 
-   🎓 Studenti | Username | Classe | Password | | -------- | ------ | -------- | | stud1 | 1A | 0000 | | stud2 | 1A |
+   🎓 **Studenti**
+   | Username | Classe | Password |
+   | -------- | ------ | -------- |
+   | stud1 | 1A | 0000 |
+   | stud2 | 1A |
    0000 | | stud3 | 1A | 0000 | | stud4 | 1A | 0000 | | stud5 | 1A | 0000 | | stud6 | 2A | 0000 | | stud7 | 2A |
    0000 | | stud8 | 2A | 0000 | | stud9 | 2A | 0000 | | stud10 | 2A | 0000 | ---
 

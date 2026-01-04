@@ -3,34 +3,58 @@
 1. **Build del progetto:** `mvn clean install`
 2. **Esecuzione:** `mvn javafx:run`
 
-👨‍🏫 Docenti
-| Username | Password |
-| -------- | -------- |
-| prof1 | 0000 |
-| prof2 | 0000 |
-| prof3 | 0000 |
-| prof4 | 0000 |
-| prof5 | 0000 |
-| prof6 | 0000 |
-| prof7 | 0000 |
-| prof8 | 0000 |
-| prof9 | 0000 |
-| prof10 | 0000 |
+## Accesso al sistema
 
-🎓 Studenti
-| Username | Classe | Password |
-| -------- | ------ | -------- |
-| stud1 | 1A | 0000 |
-| stud2 | 1A | 0000 |
-| stud3 | 1A | 0000 |
-| stud4 | 1A | 0000 |
-| stud5 | 1A | 0000 |
-| stud6 | 2A | 0000 |
-| stud7 | 2A | 0000 |
-| stud8 | 2A | 0000 |
-| stud9 | 2A | 0000 |
-| stud10 | 2A | 0000 |
----
+L'applicazione permette di accedere in due modi:
+
+1. **Account predefiniti**
+
+   È possibile usare utenti già presenti per testare l'app.
+
+   👨‍🏫 **Docenti**
+   | Username | Password |
+   | -------- | -------- |
+   | prof1 | 0000 |
+   | prof2 | 0000 |
+   | prof3 | 0000 |
+   | prof4 | 0000 |
+   | prof5 | 0000 |
+   | prof6 | 0000 |
+   | prof7 | 0000 |
+   | prof8 | 0000 |
+   | prof9 | 0000 |
+   | prof10 | 0000 |
+
+   🎓 Studenti | Username | Classe | Password | | -------- | ------ | -------- | | stud1 | 1A | 0000 | | stud2 | 1A |
+   0000 | | stud3 | 1A | 0000 | | stud4 | 1A | 0000 | | stud5 | 1A | 0000 | | stud6 | 2A | 0000 | | stud7 | 2A |
+   0000 | | stud8 | 2A | 0000 | | stud9 | 2A | 0000 | | stud10 | 2A | 0000 | ---
+
+2. **Registrazione di un nuovo account**
+
+   Se l’utente non è registrato, può creare un account tramite la pagina di registrazione.
+
+   **Campi richiesti:**
+
+- Username
+- Nome
+- Cognome
+- Data di nascita
+- Codice di iscrizione
+- Password (con conferma)
+
+**Codice di iscrizione**
+
+- Fornito dalla segreteria scolastica
+- Determina il **ruolo** e, per gli studenti, la **classe di appartenenza**
+
+**Esempi illustrativi per l'app:**
+
+- `001` → Studente classe 1A
+- `002` → Studente classe 2A
+- `003` → Studente classe 3A
+- `004` → Studente classe 4A
+- `005` → Studente classe 5A
+- `006` → Docente
 
 # 📘 SCHOOL MANAGER
 

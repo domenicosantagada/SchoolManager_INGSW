@@ -196,7 +196,7 @@ Questa sezione è dedicata alla **creazione e assegnazione di attività didattic
 - Controllo del contenuto del campo di testo:
     - campo vuoto o contenente solo spazi → messaggio di avviso (`CAMPS_NOT_EMPTY`)
 - Conferma visiva dell’operazione in caso di inserimento corretto
-- Pulizia automatica del campo di input
+- Pulizia automatica del campo di input dopo l’assegnazione del compito
 
 **Navigazione**
 

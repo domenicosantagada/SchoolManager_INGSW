@@ -1,15 +1,15 @@
 package application.controller.prof;
 
-import application.persistence.Database;
-import application.persistence.DatabaseEvent;
-import application.persistence.DatabaseEventType;
-import application.exportStrategy.CSVClassExportStrategy;
+import application.exportStrategy.CSVClasseStrategy;
 import application.exportStrategy.ExportContext;
-import application.exportStrategy.PDFClassExportStrategy;
+import application.exportStrategy.PDFClasseStrategy;
 import application.model.Nota;
 import application.model.StudenteTable;
 import application.model.ValutazioneStudente;
 import application.observer.Observer;
+import application.persistence.Database;
+import application.persistence.DatabaseEvent;
+import application.persistence.DatabaseEventType;
 import application.utility.MessageDebug;
 import application.view.SceneHandler;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -308,7 +308,7 @@ public class StudentiController implements Observer {
     @FXML
     private void exportPDF() {
         // Impostiamo la strategia concreta
-        exportContext.setStrategy(new PDFClassExportStrategy());
+        exportContext.setStrategy(new PDFClasseStrategy());
 
         // Eseguiamo l'esportazione
         exportContext.exportAndamentoClasse(studentiList);
@@ -317,7 +317,7 @@ public class StudentiController implements Observer {
     @FXML
     public void exportCSV(MouseEvent mouseEvent) {
         // Impostiamo la strategia concreta
-        exportContext.setStrategy(new CSVClassExportStrategy());
+        exportContext.setStrategy(new CSVClasseStrategy());
 
         // Eseguiamo l'esportazione
         exportContext.exportAndamentoClasse(studentiList);

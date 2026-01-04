@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Strategia Concreta per l'esportazione della scheda di valutazione dello Studente in formato CSV.
  */
-public class CSVExportStrategy implements StudentEvaluationStrategy {
+public class CSVStudenteStrategy implements ExportVotiStudente {
 
     @Override
     public void export(List<ValutazioneStudente> voti, File file) throws Exception {

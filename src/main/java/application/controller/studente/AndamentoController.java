@@ -1,13 +1,13 @@
 package application.controller.studente;
 
+import application.exportStrategy.CSVStudenteStrategy;
+import application.exportStrategy.ExportContext;
+import application.exportStrategy.PDFStudenteStrategy;
+import application.model.ValutazioneStudente;
+import application.observer.Observer;
 import application.persistence.Database;
 import application.persistence.DatabaseEvent;
 import application.persistence.DatabaseEventType;
-import application.exportStrategy.CSVExportStrategy;
-import application.exportStrategy.ExportContext;
-import application.exportStrategy.PDFExportStrategy;
-import application.model.ValutazioneStudente;
-import application.observer.Observer;
 import application.view.SceneHandler;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -232,7 +232,7 @@ public class AndamentoController implements Observer {
     @FXML
     private void exportPDF(MouseEvent event) {
         // Impostiamo la strategia concreta per l'esportazione in PDF
-        exportContext.setStrategy(new PDFExportStrategy());
+        exportContext.setStrategy(new PDFStudenteStrategy());
         // Eseguiamo l'esportazione
         exportContext.exportValutazione(voti);
     }
@@ -240,7 +240,7 @@ public class AndamentoController implements Observer {
     @FXML
     public void exportCSV(MouseEvent mouseEvent) {
         // Impostiamo la strategia concreta
-        exportContext.setStrategy(new CSVExportStrategy());
+        exportContext.setStrategy(new CSVStudenteStrategy());
         // Eseguiamo l'esportazione
         exportContext.exportValutazione(voti);
     }

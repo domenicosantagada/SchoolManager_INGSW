@@ -1,8 +1,8 @@
 package application.dao;
 
-import application.persistence.DatabaseConnection;
 import application.model.CompitoAssegnato;
 import application.model.ElaboratoCaricato;
+import application.persistence.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,13 +14,14 @@ import java.util.List;
 public class CompitiDAO {
 
     public CompitiDAO() {
-        createTables();
+        createTables(); // Crea le tabelle compiti ed elaborati se non esistono
     }
 
     private Connection getConnection() {
         return DatabaseConnection.getInstance().getConnection();
     }
 
+    // Crea le tabelle per compiti e elaborati
     private void createTables() {
         String CREATE_COMPITI_TABLE = """
                 CREATE TABLE IF NOT EXISTS compiti (
@@ -54,9 +55,9 @@ public class CompitiDAO {
         }
     }
 
+    // Inserisce un nuovo compito nella tabella
     public boolean insertCompito(CompitoAssegnato compito) {
         String query = "INSERT INTO compiti (professore, materia, data, descrizione, classe) VALUES (?, ?, ?, ?, ?)";
-        boolean result = false;
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             statement.setString(1, compito.prof());
             statement.setString(2, compito.materia());
@@ -64,13 +65,13 @@ public class CompitiDAO {
             statement.setString(4, compito.descrizione());
             statement.setString(5, compito.classe());
             statement.executeUpdate();
-            result = true;
+            return true;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return result;
     }
 
+    // Restituisce tutti i compiti assegnati a una classe
     public List<CompitoAssegnato> getCompitiClasse(String classe) {
         List<CompitoAssegnato> compiti = new ArrayList<>();
         String query = """
@@ -82,13 +83,14 @@ public class CompitiDAO {
             statement.setString(1, classe);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String professore = resultSet.getString("professore");
-                String materia = resultSet.getString("materia");
-                String data = resultSet.getString("data");
-                String descrizione = resultSet.getString("descrizione");
-                String classeCompito = resultSet.getString("classe");
-                compiti.add(new CompitoAssegnato(id, professore, materia, data, descrizione, classeCompito));
+                compiti.add(new CompitoAssegnato(
+                        resultSet.getInt("id"),
+                        resultSet.getString("professore"),
+                        resultSet.getString("materia"),
+                        resultSet.getString("data"),
+                        resultSet.getString("descrizione"),
+                        resultSet.getString("classe")
+                ));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -96,9 +98,9 @@ public class CompitiDAO {
         return compiti;
     }
 
+    // Inserisce un elaborato per un compito
     public boolean insertElaborato(ElaboratoCaricato elaborato) {
         String query = "INSERT INTO elaboratiCaricati (compitoId, studente, data, commento, file) VALUES (?, ?, ?, ?, ?)";
-        boolean result = false;
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             statement.setInt(1, elaborato.compito().id());
             statement.setString(2, elaborato.studente());
@@ -106,13 +108,13 @@ public class CompitiDAO {
             statement.setString(4, elaborato.commento());
             statement.setBytes(5, elaborato.file());
             statement.executeUpdate();
-            result = true;
+            return true;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return result;
     }
 
+    // Restituisce tutti gli elaborati di un compito
     public List<ElaboratoCaricato> getElaboratiCompito(int compitoId) {
         List<ElaboratoCaricato> elaborati = new ArrayList<>();
         String query = """
@@ -135,13 +137,14 @@ public class CompitiDAO {
                         resultSet.getString("classe")
                 );
 
-                int id = resultSet.getInt("id");
-                String studente = resultSet.getString("studente");
-                String data = resultSet.getString("data");
-                String commento = resultSet.getString("commento");
-                byte[] file = resultSet.getBytes("file");
-
-                elaborati.add(new ElaboratoCaricato(compito, studente, data, commento, file, id));
+                elaborati.add(new ElaboratoCaricato(
+                        compito,
+                        resultSet.getString("studente"),
+                        resultSet.getString("data"),
+                        resultSet.getString("commento"),
+                        resultSet.getBytes("file"),
+                        resultSet.getInt("id")
+                ));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -149,6 +152,7 @@ public class CompitiDAO {
         return elaborati;
     }
 
+    // Controlla se un compito ha almeno un elaborato
     public boolean hasElaboratiForCompito(int compitoId) {
         String query = "SELECT COUNT(*) FROM elaboratiCaricati WHERE compitoId = ?";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -163,23 +167,23 @@ public class CompitiDAO {
         return false;
     }
 
+    // Elimina un compito dalla tabella
     public boolean deleteCompito(int compitoId) {
         String query = "DELETE FROM compiti WHERE id = ?";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             statement.setInt(1, compitoId);
-            int rowsAffected = statement.executeUpdate();
-            return rowsAffected > 0;
+            return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante l'eliminazione del compito: " + e.getMessage(), e);
         }
     }
 
+    // Elimina un elaborato specifico
     public boolean deleteElaborato(int elaboratoId) {
         String query = "DELETE FROM elaboratiCaricati WHERE id = ?";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             statement.setInt(1, elaboratoId);
-            int rowsAffected = statement.executeUpdate();
-            return rowsAffected > 0;
+            return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante l'eliminazione dell'elaborato: " + e.getMessage(), e);
         }

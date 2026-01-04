@@ -13,55 +13,54 @@ import java.io.IOException;
 public class HomeStudentController {
 
     @FXML
-    private ImageView logoView;
+    private ImageView logoView;       // Logo dell'istituto
     @FXML
-    private Label studentInfo;
+    private Label studentInfo;        // Nome completo dello studente
     @FXML
-    private Label classeStudente;
+    private Label classeStudente;     // Classe dello studente
 
-    // Metodo per per mostrare la pagina delle performance dello studente
+    // Mostra la pagina delle performance dello studente
     @FXML
     public void performanceClicked(ActionEvent actionEvent) throws IOException {
         SceneHandler.getInstance().setAndamentoPage();
     }
 
-    // Metodo per per mostrare la pagina dei compiti assegnati allo studente
+    // Mostra la pagina dei compiti assegnati
     @FXML
     public void assignmentClicked(ActionEvent actionEvent) throws IOException {
         SceneHandler.getInstance().setCompitiPage();
     }
 
-    // Metodo per per mostrare la pagina delle note disciplinari dello studente
+    // Mostra la pagina delle note disciplinari
     @FXML
     public void notesButtonClicked(ActionEvent actionEvent) throws IOException {
-        // Logica per gestire il click su "Note disciplinari"
         SceneHandler.getInstance().setNotePage();
     }
 
-    // Metodo per mostrare la pagina delle assenze dello studente
+    // Mostra la pagina delle assenze dello studente
+    @FXML
     public void assenzeClicked(ActionEvent actionEvent) throws IOException {
-        // Naviga alla pagina delle assenze dello studenteq
         SceneHandler.getInstance().setAssenzeStudentePage();
     }
 
-    // Metodo per effettuare il logout dello studente
+    // Effettua il logout e ritorna alla pagina di login
     @FXML
     public void logoutClicked(ActionEvent actionEvent) throws IOException {
-        // Naviga alla pagina di login
         SceneHandler.getInstance().setLoginPage();
     }
 
+    // Inizializza la home dello studente: carica logo, nome e classe
     public void initialize() {
-
-        // Carica e imposta il logo dell'istituto
+        // Carica il logo dell'istituto
         String imagePath = getClass().getResource("/icon/logo1.png").toExternalForm();
         logoView.setImage(new Image(imagePath));
+        logoView.setSmooth(true);
 
-        // Recupera le informazioni dello studente
+        // Imposta il nome completo dello studente
         String studentInfoText = Database.getInstance().getFullName(SceneHandler.getInstance().getUsername());
         studentInfo.setText(studentInfoText.toUpperCase());
 
-        // Recupera e imposta la classe dello studente
+        // Imposta la classe dello studente
         String classe = Database.getInstance().getClasseUser(SceneHandler.getInstance().getUsername());
         classeStudente.setText(classe.toUpperCase());
     }

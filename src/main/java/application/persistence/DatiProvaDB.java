@@ -8,9 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Classe utility per popolare il DB con molti dati di prova realistici.
- */
+// Classe utility per popolare il DB con molti dati di prova realistici
 public class DatiProvaDB {
 
     private static final String DB_FILE_NAME = "gestionale.db";

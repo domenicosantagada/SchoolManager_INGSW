@@ -1,7 +1,7 @@
 package application.dao;
 
-import application.persistence.DatabaseConnection;
 import application.model.Nota;
+import application.persistence.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,13 +13,14 @@ import java.util.List;
 public class NoteDAO {
 
     public NoteDAO() {
-        createTables();
+        createTables(); // Crea la tabella note se non esiste
     }
 
     private Connection getConnection() {
         return DatabaseConnection.getInstance().getConnection();
     }
 
+    // Crea la tabella delle note disciplinari
     private void createTables() {
         String CREATE_NOTE_TABLE = """
                 CREATE TABLE IF NOT EXISTS note (
@@ -39,22 +40,22 @@ public class NoteDAO {
         }
     }
 
+    // Inserisce una nuova nota per uno studente
     public boolean insertNota(Nota nota) {
         String query = "INSERT INTO note (studente, professore, nota, dataInserimento) VALUES (?, ?, ?, ?)";
-        boolean result = false;
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             statement.setString(1, nota.studente());
             statement.setString(2, nota.prof());
             statement.setString(3, nota.nota());
             statement.setString(4, nota.data());
             statement.executeUpdate();
-            result = true;
+            return true;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return result;
     }
 
+    // Restituisce tutte le note di uno studente
     public List<Nota> getNoteStudente(String studente) {
         List<Nota> note = new ArrayList<>();
         String query = "SELECT professore, nota, dataInserimento FROM note WHERE studente = ?";
@@ -63,10 +64,12 @@ public class NoteDAO {
             statement.setString(1, studente);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                String professore = resultSet.getString("professore");
-                String nota = resultSet.getString("nota");
-                String dataInserimento = resultSet.getString("dataInserimento");
-                note.add(new Nota(studente, professore, nota, dataInserimento));
+                note.add(new Nota(
+                        studente,
+                        resultSet.getString("professore"),
+                        resultSet.getString("nota"),
+                        resultSet.getString("dataInserimento")
+                ));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

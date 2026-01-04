@@ -1,8 +1,8 @@
 package application.controller.studente;
 
-import application.persistence.Database;
 import application.model.CompitoAssegnato;
 import application.model.ElaboratoCaricato;
+import application.persistence.Database;
 import application.view.SceneHandler;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,131 +24,107 @@ import java.util.List;
 
 public class CompitiController {
 
-    public BorderPane caricaElaboratoPane;
-    public BorderPane mainPane;
-    public Label materiaLabeld;
-    public Label argomentoLabel;
-    public TextArea commentoArea;
     @FXML
-    public VBox elaboratiContainer; // Container per gli elaborati già caricati
+    private BorderPane mainPane, caricaElaboratoPane;
+
+    @FXML
+    private Label materiaLabeld, argomentoLabel, classeLabel;
+
+    @FXML
+    private VBox compitiContainer, elaboratiContainer;
+
+    @FXML
+    private TextArea commentoArea;
+
     private String studente;
     private String classe;
-    private List<CompitoAssegnato> compiti = null;
-    private CompitoAssegnato selectedCompito; // Per tenere traccia del compito selezionato
-    private File selectedFile; // Per tenere traccia del file selezionato
+    private List<CompitoAssegnato> compiti;
+    private CompitoAssegnato selectedCompito;
+    private File selectedFile;
 
-    @FXML
-    private VBox compitiContainer;
-    @FXML
-    private Label classeLabel;
-
-    // Metodo per tornare alla home dello studente
-    @FXML
-    public void backButtonClicked() throws IOException {
-//        // Deregistro questo controller come observer del database
-//        Database.getInstance().detach(this); // Buona pratica
-        SceneHandler.getInstance().setStudentHomePage(SceneHandler.getInstance().getUsername());
-    }
-
+    // Inizializza controller: imposta classe, carica compiti e nasconde pannello elaborato
     @FXML
     public void initialize() {
         caricaElaboratoPane.setVisible(false);
         studente = SceneHandler.getInstance().getUsername();
         classe = Database.getInstance().getClasseUser(studente);
-        compiti = Database.getInstance().getCompitiClasse(classe);
         classeLabel.setText(classe.toUpperCase());
 
-//        // Registro questo controller come observer del database
-//        Database.getInstance().attach(this);
-
+        compiti = Database.getInstance().getCompitiClasse(classe);
         visualizzaCompiti();
     }
 
-    // Metodo per visualizzare i compiti assegnati
+    // Torna alla home dello studente
+    @FXML
+    public void backButtonClicked() throws IOException {
+        SceneHandler.getInstance().setStudentHomePage(studente);
+    }
+
+    // Visualizza i compiti assegnati nel container
     private void visualizzaCompiti() {
-        // Controllo se ci sono compiti assegnati
+        compitiContainer.getChildren().clear();
         if (compiti != null && !compiti.isEmpty()) {
-
-            // Pulisco il container dei compiti
-            compitiContainer.getChildren().clear();
-
-            // Genero le etichette per ogni compito
-            for (CompitoAssegnato comp : compiti)
+            for (CompitoAssegnato comp : compiti) {
                 generaLabel(comp);
+            }
         }
     }
 
+    // Genera il BorderPane cliccabile per ogni compito
     private void generaLabel(CompitoAssegnato comp) {
         BorderPane newBorderPane = new BorderPane();
-        Label materia = new Label();
-        materia.setText(comp.materia().toUpperCase());
-        Label message = new Label();
-        message.setText(comp.descrizione());
-        Label date = new Label();
-        date.setText(comp.data());
+
+        Label materia = new Label(comp.materia().toUpperCase());
+        Label message = new Label(comp.descrizione());
+        Label date = new Label(comp.data());
 
         newBorderPane.setTop(materia);
         newBorderPane.setCenter(message);
         newBorderPane.setBottom(date);
-        newBorderPane.setAlignment(newBorderPane.getTop(), Pos.CENTER);
-        newBorderPane.setAlignment(newBorderPane.getBottom(), Pos.CENTER);
-        newBorderPane.setAlignment(newBorderPane.getCenter(), Pos.CENTER);
+        newBorderPane.setAlignment(materia, Pos.CENTER);
+        newBorderPane.setAlignment(message, Pos.CENTER);
+        newBorderPane.setAlignment(date, Pos.CENTER);
 
-        // Aggiungo stile al BorderPane
         newBorderPane.getStyleClass().add("compitiPane");
-
-        // Aggiungo stile per il cursore (opzionale, per far capire che è cliccabile)
         newBorderPane.setStyle("-fx-cursor: hand;");
 
-        // Aggiungo stile al label nel top
         materia.getStyleClass().add("materiaLabel");
-        // Aggiungo stile al label nel center
         message.getStyleClass().add("messageLabel");
-        // Aggiungo stile al label nel bottom
         date.getStyleClass().add("dateLabel");
 
-        // [MODIFICA] Aggiungo l'evento di click per stampare le info sul terminale
+        // Evento click: mostra pannello caricamento elaborato
         newBorderPane.setOnMouseClicked(event -> {
-            System.out.println("Hai cliccato sul compito di: " + comp.materia());
-            System.out.println("Professore: " + comp.prof());
-            System.out.println("Descrizione: " + comp.descrizione());
-            System.out.println("Data inserimento: " + comp.data());
-            System.out.println("------------------------------");
+            selectedCompito = comp;
+            selectedFile = null;
+            commentoArea.clear();
 
-            selectedCompito = comp; // Salvo il compito selezionato
-            selectedFile = null; // Resetta il file selezionato
-            commentoArea.setText(""); // Resetta il commento
-
-            // Mostro il pannello di caricamento elaborato
             mainPane.setDisable(true);
-            caricaElaboratoPane.setVisible(true);
             mainPane.setEffect(new GaussianBlur());
+            caricaElaboratoPane.setVisible(true);
             caricaElaboratoPane.requestFocus();
 
-            // Imposto le etichette nel pannello di caricamento elaborato
             materiaLabeld.setText(comp.materia().toUpperCase());
             argomentoLabel.setText(comp.descrizione());
 
-            // Carico e mostro gli elaborati già caricati per questo compito
             caricaElaboratiEsistenti(comp);
         });
 
-        // Aggiungo il BorderPane al container dei compiti
         compitiContainer.getChildren().add(newBorderPane);
     }
 
+    // Carica gli elaborati già inviati dallo studente per il compito selezionato
     private void caricaElaboratiEsistenti(CompitoAssegnato comp) {
         elaboratiContainer.getChildren().clear();
         List<ElaboratoCaricato> elaborati = Database.getInstance().getElaboratiCompito(comp.id());
 
-        // Filtra solo gli elaborati dello studente corrente
         elaborati.stream()
                 .filter(e -> e.studente().equals(studente))
                 .forEach(elaborato -> {
                     BorderPane elPane = new BorderPane();
                     elPane.setStyle("-fx-background-color: #f9f9f9; -fx-padding: 5; -fx-border-color: #ddd; -fx-border-radius: 3;");
 
-                    Label info = new Label(elaborato.data() + " - " + (elaborato.commento() != null && !elaborato.commento().isEmpty() ? elaborato.commento() : "Nessun commento"));
+                    Label info = new Label(elaborato.data() + " - " +
+                            (elaborato.commento() != null && !elaborato.commento().isEmpty() ? elaborato.commento() : "Nessun commento"));
                     info.setMaxWidth(300);
                     info.setWrapText(true);
 
@@ -160,7 +136,7 @@ public class CompitiController {
                     eliminaBtn.setOnAction(e -> {
                         if (Database.getInstance().deleteElaborato(elaborato.id())) {
                             SceneHandler.getInstance().showInformation("Elaborato eliminato.");
-                            caricaElaboratiEsistenti(comp); // Ricarica la lista
+                            caricaElaboratiEsistenti(comp);
                         } else {
                             SceneHandler.getInstance().showWarning("Errore durante l'eliminazione.");
                         }
@@ -177,9 +153,10 @@ public class CompitiController {
                 });
     }
 
+    // Scarica un elaborato selezionato in PDF
     private void scaricaPDF(ElaboratoCaricato elaborato) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Salva il tuo elaborato");
+        fileChooser.setTitle("Salva elaborato");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("File PDF", "*.pdf"));
         fileChooser.setInitialFileName("MioElaborato.pdf");
 
@@ -194,17 +171,36 @@ public class CompitiController {
         }
     }
 
-    // Metodo per tornare indietro dalla schermata di caricamento elaborato
+    // Torna indietro dal pannello di caricamento elaborato
+    @FXML
     public void backFromCaricaElaboratoClicked(MouseEvent mouseEvent) {
         caricaElaboratoPane.setVisible(false);
-        mainPane.setVisible(true);
-        mainPane.setEffect(null);
         mainPane.setDisable(false);
+        mainPane.setEffect(null);
         selectedCompito = null;
         selectedFile = null;
     }
 
-    // Metodo per inviare l'elaborato
+    // Seleziona il file PDF dell'elaborato
+    @FXML
+    public void caricaRisorsaClicked(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Scegli un file PDF");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("File PDF", "*.pdf"));
+
+        File projectRoot = new File(System.getProperty("user.dir"));
+        File initialDir = new File(projectRoot, "Esempio PDF esportati");
+        if (!initialDir.exists()) initialDir.mkdirs();
+        fileChooser.setInitialDirectory(initialDir);
+
+        selectedFile = fileChooser.showOpenDialog(mainPane.getScene().getWindow());
+        if (selectedFile != null) {
+            System.out.println("File scelto: " + selectedFile.getAbsolutePath());
+        }
+    }
+
+    // Invia l'elaborato al database
+    @FXML
     public void inviaElaboratoClicked(ActionEvent actionEvent) {
         if (selectedFile == null) {
             SceneHandler.getInstance().showWarning("Devi selezionare un file PDF per l'elaborato.");
@@ -216,61 +212,17 @@ public class CompitiController {
             String commento = commentoArea.getText();
             String data = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-            ElaboratoCaricato elaborato = new ElaboratoCaricato(
-                    selectedCompito,
-                    studente,
-                    data,
-                    commento,
-                    fileContent
-            );
+            ElaboratoCaricato elaborato = new ElaboratoCaricato(selectedCompito, studente, data, commento, fileContent);
 
-            boolean success = Database.getInstance().insertElaborato(elaborato);
-            if (success) {
+            if (Database.getInstance().insertElaborato(elaborato)) {
                 SceneHandler.getInstance().showInformation("Elaborato inviato con successo!");
-                System.out.println("Elaborato inviato!");
                 backFromCaricaElaboratoClicked(null);
             } else {
                 SceneHandler.getInstance().showWarning("Errore durante l'invio dell'elaborato.");
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
             SceneHandler.getInstance().showWarning("Errore durante la lettura del file: " + e.getMessage());
         }
     }
-
-    public void caricaRisorsaClicked(ActionEvent actionEvent) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Scegli un file PDF");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("File PDF", "*.pdf"));
-
-        // Cartella iniziale: "Esempio PDF esportati" nella root del progetto
-        File projectRoot = new File(System.getProperty("user.dir"));
-        File initialDir = new File(projectRoot, "Esempio PDF esportati");
-        if (!initialDir.exists()) {
-            initialDir.mkdirs(); // crea la cartella se non esiste
-        }
-        fileChooser.setInitialDirectory(initialDir);
-
-        // Ottieni lo stage dalla scena del mainPane
-        selectedFile = fileChooser.showOpenDialog((javafx.stage.Window) mainPane.getScene().getWindow());
-        if (selectedFile != null) {
-            System.out.println("File scelto: " + selectedFile.getAbsolutePath());
-        }
-    }
-
-//    // 3. Implementa il metodo update
-//    @Override
-//    public void update(Object event) {
-//        // Controlla se l'evento è quello giusto
-//        if (event instanceof String && "NUOVO_COMPITO".equals(event)) {
-//            System.out.println("CompitiController ha ricevuto notifica di nuovo compito.");
-//            // Aggiorna la UI (Platform.runLater è necessario se l'aggiornamento arriva da un thread diverso)
-//            Platform.runLater(() -> {
-//                // Ricarica la lista dal DB
-//                compiti = Database.getInstance().getCompitiClasse(classe);
-//                visualizzaCompiti();
-//            });
-//        }
-//    }
 }

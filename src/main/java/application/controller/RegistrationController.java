@@ -8,8 +8,6 @@ import application.persistence.Database;
 import application.utility.BCryptService;
 import application.utility.MessageDebug;
 import application.view.SceneHandler;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -24,84 +22,75 @@ import java.util.List;
 
 public class RegistrationController {
 
-    // Costanti per distinguere i tipi di utente
     public static final String PROFTYPE = "professore";
     public static final String STUDENTTYPE = "studente";
 
     @FXML
-    private ChoiceBox<String> materiaChoiceBox; // lista materie, visibile solo per i prof
+    private ChoiceBox<String> materiaChoiceBox;
     @FXML
-    private Button registerButton; // pulsante di registrazione
+    private Button registerButton;
     @FXML
-    private Label materiaLabel; // label della materia (solo prof)
+    private Label materiaLabel;
     @FXML
-    private TextField codiceIscrizione; // codice di iscrizione (identifica classe o ruolo)
+    private TextField codiceIscrizione;
     @FXML
-    private TextField surnameField; // cognome
+    private TextField surnameField;
     @FXML
-    private PasswordField repeatPasswordField; // conferma password
+    private PasswordField repeatPasswordField;
     @FXML
-    private TextField nameField; // nome
+    private TextField nameField;
     @FXML
-    private DatePicker datePicker; // data di nascita
+    private DatePicker datePicker;
     @FXML
-    private PasswordField passwordField; // password
+    private PasswordField passwordField;
     @FXML
-    private TextField usernameField; // username
+    private TextField usernameField;
     @FXML
-    private ImageView logoView; // immagine del logo
+    private ImageView logoView;
 
+    // Registra un nuovo utente studente o professore
     @FXML
     public void registerClicked(ActionEvent actionEvent) throws IOException {
-        // Lettura dei campi utente
         String username = this.usernameField.getText();
         String nome = this.nameField.getText();
         String cognome = this.surnameField.getText();
         String dataNascita = "";
 
-        // Formattazione della data (se inserita)
         if (datePicker.getValue() != null) {
             dataNascita = this.datePicker.getValue().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         }
 
-        // Codice iscrizione e materia (per i professori)
         String codiceIscrizione = this.codiceIscrizione.getText();
-        String materia = this.materiaChoiceBox.getValue() == null ? "" : this.materiaChoiceBox.getValue().toString();
+        String materia = this.materiaChoiceBox.getValue() == null ? "" : this.materiaChoiceBox.getValue();
 
-        // Password e hashing
         String password = this.passwordField.getText();
         String hashedPassword = BCryptService.hashPassword(password);
 
-        // Controlli preliminari sui campi
+        // Validazioni principali
         if (username.isEmpty() || nome.isEmpty() || cognome.isEmpty() || dataNascita.isEmpty()
                 || codiceIscrizione.isEmpty() || password.isEmpty()) {
             SceneHandler.getInstance().showWarning(MessageDebug.CAMPS_NOT_EMPTY);
-        } else if (usernameUtilizzato(username)) { // Username già presente
+        } else if (usernameUtilizzato(username)) {
             SceneHandler.getInstance().showWarning(MessageDebug.USERNAME_NOT_VALID);
-        } else if (datePicker.getValue().isAfter(LocalDate.now())) { // Data impossibile
+        } else if (datePicker.getValue().isAfter(LocalDate.now())) {
             SceneHandler.getInstance().showWarning(MessageDebug.DATE_NOT_VALID);
-        } else if (!password.equals(repeatPasswordField.getText())) { // Le password non combaciano
+        } else if (!password.equals(repeatPasswordField.getText())) {
             SceneHandler.getInstance().showWarning(MessageDebug.PASSWORD_NOT_MATCH);
-        } else if (password.length() < 4) { // Password troppo corta
+        } else if (password.length() < 4) {
             SceneHandler.getInstance().showWarning(MessageDebug.PASSWORD_NOT_VALID);
         } else {
-            // Creazione oggetto utente generico
             User user = new User(username, nome.toUpperCase(), cognome.toUpperCase(), hashedPassword, dataNascita);
-
-            // Recupero tipo (prof o studente) dal codice di iscrizione
             TipologiaClasse tipologiaUtente = Database.getInstance().getTipologiaUtente(codiceIscrizione);
 
-            if (tipologiaUtente == null) { // Codice non valido
+            if (tipologiaUtente == null) {
                 SceneHandler.getInstance().showWarning(MessageDebug.CODE_ERROR);
-            } else if (tipologiaUtente.tipologia().equals("studente")) {
-                // Creazione studente
+            } else if (tipologiaUtente.tipologia().equals(STUDENTTYPE)) {
                 Studente studente = new Studente(user, tipologiaUtente.classe());
                 if (Database.getInstance().insertStudente(studente)) {
                     SceneHandler.getInstance().showInformation(MessageDebug.REGISTRATION_OK);
                     SceneHandler.getInstance().setLoginPage();
                 }
-            } else if (tipologiaUtente.tipologia().equals("professore")) {
-                // Registrazione professore richiede anche materia
+            } else if (tipologiaUtente.tipologia().equals(PROFTYPE)) {
                 if (materia.isEmpty()) {
                     SceneHandler.getInstance().showWarning(MessageDebug.CAMPS_NOT_EMPTY);
                 } else {
@@ -115,113 +104,86 @@ public class RegistrationController {
         }
     }
 
-    // Controlla se lo username è già usato
+    // Controlla se uno username è già in uso
     private boolean usernameUtilizzato(String username) {
         return Database.getInstance().usernameUtilizzato(username);
     }
 
-    // Verifica validità del codice di iscrizione
+    // Controlla validità del codice di iscrizione
     private boolean codiceIscrizioneValido(String codiceIscrizione) {
         return Database.getInstance().codiceIscrizioneValido(codiceIscrizione);
     }
 
-    // Recupera tipologia utente dal codice
+    // Recupera la tipologia dell'utente dal codice
     private String tipologiaUser(String codiceIscrizione) {
         return Database.getInstance().tipologiaUser(codiceIscrizione);
     }
 
+    // Inizializza la schermata di registrazione
     public void initialize() {
-        // Imposta immagine del logo
         String imagePath = getClass().getResource("/icon/logo.png").toExternalForm();
         logoView.setImage(new Image(imagePath));
 
-        // Aggiunge i listener per la validazione in tempo reale
         addListeners();
 
-        // Nasconde i campi relativi ai professori
+        // Nascondi campi relativi ai professori
         materiaChoiceBox.setVisible(false);
         materiaLabel.setVisible(false);
 
-        // Riempie la choice box delle materie
         setMaterieChoiceBox();
     }
 
-    // Inserisce nella choiceBox le materie prelevate dal DB
+    // Popola la choiceBox delle materie
     private void setMaterieChoiceBox() {
         List<String> materie = Database.getInstance().getAllMaterieIstituto();
         materiaChoiceBox.getItems().addAll(materie);
     }
 
-    // Listener per validazione live dei campi
+    // Listener per validazione in tempo reale dei campi
     private void addListeners() {
 
-        // Listener sul campo username
-        usernameField.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+        // Validazione live username
+        usernameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.isBlank() || usernameUtilizzato(newValue)) {
+                usernameField.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
+            } else {
+                usernameField.styleProperty().set(MessageDebug.CHECK_OK_COLOR);
+            }
+        });
 
-                // Controlli sullo username
-                if (newValue == null || newValue.isBlank()) {
-                    usernameField.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
-                } else if (!usernameUtilizzato(newValue)) {
-                    usernameField.styleProperty().set(MessageDebug.CHECK_OK_COLOR);
+        // Validazione live codice iscrizione e visibilità campo materia
+        codiceIscrizione.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.isBlank() || !codiceIscrizioneValido(newValue)) {
+                codiceIscrizione.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
+                materiaChoiceBox.setVisible(false);
+                materiaLabel.setVisible(false);
+            } else {
+                codiceIscrizione.styleProperty().set(MessageDebug.CHECK_OK_COLOR);
+                if (tipologiaUser(newValue).equals(MessageDebug.PROF_TYPE)) {
+                    materiaChoiceBox.setVisible(true);
+                    materiaLabel.setVisible(true);
                 } else {
-                    usernameField.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
+                    materiaChoiceBox.setVisible(false);
+                    materiaLabel.setVisible(false);
                 }
             }
         });
 
-        // Listener sul codice di iscrizione
-        codiceIscrizione.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-
-                if (newValue == null || newValue.isBlank()) {
-                    codiceIscrizione.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
-                } else if (!codiceIscrizioneValido(newValue)) {
-                    codiceIscrizione.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
-                } else {
-                    codiceIscrizione.styleProperty().set(MessageDebug.CHECK_OK_COLOR);
-
-                    // Se il codice indica un professore, mostra campo materia
-                    if (tipologiaUser(newValue).equals(MessageDebug.PROF_TYPE)) {
-                        materiaChoiceBox.setVisible(true);
-                        materiaLabel.setVisible(true);
-                    } else {
-                        materiaChoiceBox.setVisible(false);
-                        materiaLabel.setVisible(false);
-                    }
-                }
+        // Validazione password
+        passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.isBlank() || newValue.length() < 4) {
+                passwordField.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
+            } else {
+                passwordField.styleProperty().set(MessageDebug.CHECK_OK_COLOR);
             }
         });
 
-        // Listener sulla password
-        passwordField.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-
-                if (newValue == null || newValue.isBlank()) {
-                    passwordField.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
-                } else if (newValue.length() < 4) {
-                    passwordField.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
-                } else {
-                    passwordField.styleProperty().set(MessageDebug.CHECK_OK_COLOR);
-                }
-            }
-        });
-
-        // Listener sulla ripetizione password
-        repeatPasswordField.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-
-                if (newValue == null || newValue.isBlank()) {
-                    repeatPasswordField.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
-                } else if (!newValue.equals(passwordField.getText())) {
-                    repeatPasswordField.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
-                } else {
-                    repeatPasswordField.styleProperty().set(MessageDebug.CHECK_OK_COLOR);
-                }
+        // Validazione conferma password
+        repeatPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.isBlank() || !newValue.equals(passwordField.getText())) {
+                repeatPasswordField.styleProperty().set(MessageDebug.CHECK_NOT_OK_COLOR);
+            } else {
+                repeatPasswordField.styleProperty().set(MessageDebug.CHECK_OK_COLOR);
             }
         });
     }
@@ -229,7 +191,6 @@ public class RegistrationController {
     // Torna alla pagina di login
     @FXML
     public void backButtonClicked(MouseEvent mouseEvent) throws IOException {
-        // Torna alla pagina login
         SceneHandler.getInstance().setLoginPage();
     }
 }

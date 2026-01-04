@@ -1,5 +1,6 @@
 package application.utility;
 
+// Contiene messaggi di debug e costanti di interfaccia riutilizzabili
 public class MessageDebug {
     public static final String CAMPS_NOT_EMPTY = "Tutti i campi sono obbligatori.";
     public static final String CODE_ERROR = "Il codice non è valido.";
@@ -21,5 +22,3 @@ public class MessageDebug {
     public static final String COMPITO_INSERTED = "Compito inserito con successo.";
     public static final String COMPITO_NOT_INSERTED = "Errore durante l'inserimento del compito.";
 }
-
-

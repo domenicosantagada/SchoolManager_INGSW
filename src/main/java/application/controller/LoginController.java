@@ -16,15 +16,15 @@ import java.io.IOException;
 public class LoginController {
 
     @FXML
-    private ImageView logoView;
+    private ImageView logoView;               // Logo dell'applicazione
     @FXML
-    private TextField userField;
+    private TextField userField;              // Campo per l'inserimento dell'username
     @FXML
-    private PasswordField passwordField;
+    private PasswordField passwordField;      // Campo password nascosto
     @FXML
-    private TextField passwordVisibleField;
+    private TextField passwordVisibleField;   // Campo password visibile (toggle)
     @FXML
-    private FontAwesomeIcon toggleIconPassword;
+    private FontAwesomeIcon toggleIconPassword; // Icona per mostra/nascondi password
 
     // Metodo per navigare alla pagina di registrazione
     @FXML
@@ -37,7 +37,6 @@ public class LoginController {
     private void loginClicked() throws IOException {
         String username = userField.getText();
         String password = passwordField.getText();
-
 
         // Controllo che i campi non siano vuoti
         if (username.isEmpty() || password.isEmpty()) {
@@ -54,37 +53,41 @@ public class LoginController {
                 SceneHandler.getInstance().setProfessorHomePage(username);
             }
         } else {
-            // Mostro un messaggio di errore se le credenziali non sono valide
+            // Messaggio se credenziali non valide
             SceneHandler.getInstance().showWarning(MessageDebug.CREEDENTIALS_NOT_VALID);
         }
     }
 
+    // Inizializza la pagina di login
     public void initialize() {
+        // Carica e imposta il logo
         String imagePath = getClass().getResource("/icon/logo.png").toExternalForm();
         logoView.setImage(new Image(imagePath));
 
-        // aggiungiamo i listener per la sincronizzazione dei campi password
+        // Sincronizza i campi password visibile/nascosto
         addListeners();
 
-        // settiamo il focus sul campo username
+        // Imposta il focus sul campo username
         userField.requestFocus();
     }
 
-    // Metodo per aggiungere i listener ai campi password
+    // Aggiunge i listener per sincronizzare i campi password e gestire il tasto ENTER
     private void addListeners() {
+        // Aggiorna il campo visibile quando cambia quello nascosto
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!passwordVisibleField.isFocused()) {
                 passwordVisibleField.setText(newValue);
             }
         });
 
+        // Aggiorna il campo nascosto quando cambia quello visibile
         passwordVisibleField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!passwordField.isFocused()) {
                 passwordField.setText(newValue);
             }
         });
 
-        //aggiungiamo un listener per il tasto invio della tastiera per il login
+        // Login tramite tasto ENTER
         passwordField.setOnKeyPressed(event -> {
             switch (event.getCode()) {
                 case ENTER:
@@ -96,10 +99,9 @@ public class LoginController {
                     break;
             }
         });
-
     }
 
-    // Metodo per mostrare/nascondere la password
+    // Mostra o nasconde la password in base allo stato corrente
     @FXML
     public void togglePasswordVisibility(MouseEvent mouseEvent) {
         if (passwordField.isVisible()) {

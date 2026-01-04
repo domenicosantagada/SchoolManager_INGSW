@@ -11,7 +11,6 @@ import java.util.List;
 
 // Classe Context per gestire l'esportazione utilizzando diverse strategie di esportazione (PDF, CSV, ecc.)
 // E' implementata come Singleton per garantire un'unica istanza in tutta l'applicazione.
-
 public class ExportContext {
 
     private static ExportContext instance;
@@ -23,6 +22,7 @@ public class ExportContext {
     private ExportContext() {
     }
 
+    // Restituisce l'istanza singleton di ExportContext
     public static ExportContext getInstance() {
         if (instance == null) {
             instance = new ExportContext();
@@ -30,11 +30,12 @@ public class ExportContext {
         return instance;
     }
 
+    // Imposta la strategia di esportazione
     public void setStrategy(ExportStrategy<?> strategy) {
         this.strategy = strategy;
     }
 
-    // Nuovo metodo helper per la finestra di dialogo di salvataggio
+    // Mostra la finestra di dialogo per scegliere il file di esportazione
     private File getExportFile(String defaultFileName, String extensionDescription, String extension) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Salva File di Esportazione");
@@ -43,6 +44,7 @@ public class ExportContext {
         return fileChooser.showSaveDialog(null);
     }
 
+    // Esegue l'esportazione dei voti di uno studente
     @SuppressWarnings("unchecked")
     public void exportValutazione(List<ValutazioneStudente> voti) {
         if (strategy instanceof ExportVotiStudente studentStrategy) {
@@ -51,17 +53,12 @@ public class ExportContext {
                 String nominativo = database.getFullName(username);
                 String classe = database.getClasseUser(username);
 
-                // DEDUZIONE DEL FORMATO DALLA STRATEGIA
                 boolean isCSV = strategy.getClass().getSimpleName().contains("CSV");
                 String fileExtension = isCSV ? "*.csv" : "*.pdf";
                 String extensionDescription = isCSV ? "CSV (Comma Separated Values)" : "PDF Document";
                 String defaultFileName = nominativo + " - " + classe + "." + (isCSV ? "csv" : "pdf");
 
-
-                // 1. Ottieni il percorso del file tramite FileChooser
                 File file = getExportFile(defaultFileName, extensionDescription, fileExtension);
-
-                // 2. Esegui l'esportazione delegando alla strategia
                 studentStrategy.export(voti, file);
 
             } catch (Exception e) {
@@ -72,6 +69,7 @@ public class ExportContext {
         }
     }
 
+    // Esegue l'esportazione dell'andamento della classe
     @SuppressWarnings("unchecked")
     public void exportAndamentoClasse(List<StudenteTable> studentiList) {
         if (strategy instanceof ExportVotiClasse classStrategy) {
@@ -80,17 +78,12 @@ public class ExportContext {
                 String nominativo = database.getFullName(username);
                 String classe = database.getClasseUser(username);
 
-                // DEDUZIONE DEL FORMATO DALLA STRATEGIA
                 boolean isCSV = strategy.getClass().getSimpleName().contains("CSV");
                 String fileExtension = isCSV ? "*.csv" : "*.pdf";
                 String extensionDescription = isCSV ? "CSV (Comma Separated Values)" : "PDF Document";
                 String defaultFileName = nominativo + " - Andamento classe " + classe + "." + (isCSV ? "csv" : "pdf");
 
-
-                // 1. Ottieni il percorso del file tramite FileChooser
                 File file = getExportFile(defaultFileName, extensionDescription, fileExtension);
-
-                // 2. Esegui l'esportazione delegando alla strategia
                 classStrategy.export(studentiList, file);
 
             } catch (Exception e) {

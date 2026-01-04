@@ -22,13 +22,14 @@ public class SceneHandler {
     private SceneHandler() {
     }
 
-    // Metodo per ottenere l'istanza singleton
+    // Restituisce l'istanza singleton
     public static SceneHandler getInstance() {
         if (instance == null)
             instance = new SceneHandler();
         return instance;
     }
 
+    // Inizializza lo stage e mostra la login page
     public void init(Stage stage) throws Exception {
         this.stage = stage;
         setLoginPage();
@@ -38,9 +39,9 @@ public class SceneHandler {
         return username;
     }
 
+    // Carica una pagina FXML nello stage principale
     private void loadPage(FXMLLoader loader) throws IOException {
         Parent root = loader.load();
-        this.stage = stage;
         scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("School Manager");
@@ -51,6 +52,7 @@ public class SceneHandler {
         stage.show();
     }
 
+    // Pagine principali
     public void setLoginPage() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
         loadPage(loader);
@@ -83,25 +85,6 @@ public class SceneHandler {
         loadPage(loader);
     }
 
-    private void loadPopUp(Alert alert, String title, String message) {
-        alert.initOwner(stage);
-        alert.setTitle(title);
-        alert.setHeaderText("");
-        alert.setContentText(message);
-        DialogPane dialog = alert.getDialogPane();
-        alert.showAndWait();
-    }
-
-    public void showWarning(String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        loadPopUp(alert, "Attenzione", message);
-    }
-
-    public void showInformation(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        loadPopUp(alert, "Informazione", message);
-    }
-
     public void setAssignmentPage() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/prof/CompitiProfPage.fxml"));
         loadPage(loader);
@@ -130,5 +113,27 @@ public class SceneHandler {
     public void setConsegnePage() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/prof/ConsegneProfPage.fxml"));
         loadPage(loader);
+    }
+
+    // Mostra un pop-up Alert generico
+    private void loadPopUp(Alert alert, String title, String message) {
+        alert.initOwner(stage);
+        alert.setTitle(title);
+        alert.setHeaderText("");
+        alert.setContentText(message);
+        DialogPane dialog = alert.getDialogPane();
+        alert.showAndWait();
+    }
+
+    // Mostra messaggio di warning
+    public void showWarning(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        loadPopUp(alert, "Attenzione", message);
+    }
+
+    // Mostra messaggio informativo
+    public void showInformation(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        loadPopUp(alert, "Informazione", message);
     }
 }

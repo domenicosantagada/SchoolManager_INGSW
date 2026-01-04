@@ -28,51 +28,49 @@ public class HomeProfController {
     @FXML
     private ImageView logoView;      // Logo dell'applicazione da mostrare nella home
 
+    // Mostra la lista degli studenti associati al professore
     @FXML
     public void studentsClicked(ActionEvent actionEvent) throws IOException {
-        // Reindirizza alla lista degli studenti associati al professore
         SceneHandler.getInstance().setStudentsListPage();
     }
 
+    // Apre la sezione dei compiti/assegnazioni
     @FXML
     public void assgimentClicked(ActionEvent actionEvent) throws IOException {
-        // Apre la sezione dedicata ai compiti/assegnazioni
         SceneHandler.getInstance().setAssignmentPage();
     }
 
+    // Mostra la pagina delle assenze
     @FXML
     public void assenzeClicked(ActionEvent actionEvent) throws IOException {
-        // Mostra la pagina relativa ai voti degli studenti
         SceneHandler.getInstance().setVotesPage();
     }
 
+    // Apre la sezione delle consegne degli studenti
     @FXML
     public void consegneClicked(ActionEvent actionEvent) throws IOException {
-        // Apre la sezione dedicata alle consegne degli studenti
         SceneHandler.getInstance().setConsegnePage();
     }
 
+    // Effettua il logout e torna alla pagina di login
     @FXML
     public void logoutClicked(ActionEvent actionEvent) throws IOException {
-        // Effettua il logout e ritorna alla schermata di login
         SceneHandler.getInstance().setLoginPage();
     }
 
+    // Inizializza la home del professore con logo, info e scelta della classe
+    @FXML
     public void initialize() {
-        // Carica e visualizza il logo dell'applicazione
+        // Carica il logo
         String imagePath = getClass().getResource("/icon/logo1.png").toExternalForm();
         logoView.setImage(new Image(imagePath));
         logoView.setSmooth(true);
 
         String username = SceneHandler.getInstance().getUsername();
 
-        // Imposta il nome completo del professore nella UI
-        String profInfoText = Database.getInstance().getFullName(username);
-        profInfo.setText(profInfoText.toUpperCase());
-
-        // Imposta la materia del professore nella UI
-        String materiaProfText = Database.getInstance().getMateriaProf(username);
-        materiaProf.setText(materiaProfText.toUpperCase());
+        // Imposta nome completo e materia
+        profInfo.setText(Database.getInstance().getFullName(username).toUpperCase());
+        materiaProf.setText(Database.getInstance().getMateriaProf(username).toUpperCase());
 
         // Popola la ChoiceBox con le classi disponibili
         List<String> classi = Database.getInstance().getAllClassiNames();
@@ -84,16 +82,14 @@ public class HomeProfController {
             classeChoiceBox.setValue(currentClass);
         } else if (!classi.isEmpty()) {
             classeChoiceBox.setValue(classi.get(0));
-            // Se la classe corrente non è valida, aggiorniamo subito con la prima disponibile
             Database.getInstance().updateClasseUser(username, classi.get(0));
         }
 
-        // Aggiunge un listener per gestire il cambio di classe
+        // Listener per aggiornare la classe nel database al cambio selezione
         classeChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if (newValue != null) {
-                    // Aggiorna la classe nel database per l'utente corrente
                     Database.getInstance().updateClasseUser(username, newValue);
                     System.out.println("Classe cambiata a: " + newValue);
                 }

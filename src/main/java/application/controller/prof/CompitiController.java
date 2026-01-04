@@ -28,55 +28,55 @@ public class CompitiController implements DatabaseObserver {
     private String materia;
     private String classe;
 
+    // Torna alla homepage del professore
     @FXML
     public void backButtonClicked() throws IOException {
-        // Disaccoppiamento dell'observer prima di lasciare la pagina per evitare memory leak
         Database.getInstance().detach(this);
         SceneHandler.getInstance().setProfessorHomePage(SceneHandler.getInstance().getUsername());
     }
 
+    // Invia un nuovo compito assegnato
     @FXML
     public void inviaCompiti(ActionEvent actionEvent) throws IOException {
         if (compitiAssegnati.getText().trim().isEmpty()) {
             SceneHandler.getInstance().showWarning(MessageDebug.CAMPS_NOT_EMPTY);
             compitiAssegnati.setText("");
-        } else {
-            CompitoAssegnato compito = new CompitoAssegnato(
-                    -1,
-                    SceneHandler.getInstance().getUsername(),
-                    materia,
-                    LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-                    compitiAssegnati.getText().toUpperCase(),
-                    classe);
+            return;
+        }
 
-            if (Database.getInstance().insertCompito(compito)) {
-                SceneHandler.getInstance().showInformation(MessageDebug.COMPITO_INSERTED);
-                compitiAssegnati.setText("");
-                backButtonClicked();
-            } else {
-                SceneHandler.getInstance().showWarning(MessageDebug.COMPITO_NOT_INSERTED);
-            }
+        CompitoAssegnato compito = new CompitoAssegnato(
+                -1,
+                SceneHandler.getInstance().getUsername(),
+                materia,
+                LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                compitiAssegnati.getText().toUpperCase(),
+                classe);
+
+        if (Database.getInstance().insertCompito(compito)) {
+            SceneHandler.getInstance().showInformation(MessageDebug.COMPITO_INSERTED);
+            compitiAssegnati.setText("");
+            backButtonClicked();
+        } else {
+            SceneHandler.getInstance().showWarning(MessageDebug.COMPITO_NOT_INSERTED);
         }
     }
 
+    // Inizializza il controller
     @FXML
     public void initialize() {
-        // Registrazione del controller come observer nel Database
         Database.getInstance().attach(this);
-
         classe = Database.getInstance().getClasseUser(SceneHandler.getInstance().getUsername());
         classLabel.setText(classe);
         materia = Database.getInstance().getMateriaProf(SceneHandler.getInstance().getUsername());
     }
 
+    // Gestisce notifiche del database
     @Override
     public void update(DatabaseEvent event) {
-        // Logica per reagire ai cambiamenti dei dati
-        // Anche se questa pagina è di solo inserimento, è buona norma gestire gli eventi correlati
         if (event.type() == DatabaseEventType.NUOVO_COMPITO) {
             Platform.runLater(() -> {
                 System.out.println("Notifica: Un nuovo compito è stato inserito per la classe " + event.data());
-                // Qui si potrebbe aggiungere logica per aggiornare una eventuale lista di compiti già inviati
+                // Possibile aggiornamento di una lista di compiti se presente
             });
         }
     }

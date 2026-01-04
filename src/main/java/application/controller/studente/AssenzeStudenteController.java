@@ -21,30 +21,24 @@ import java.util.Comparator;
 import java.util.List;
 
 public class AssenzeStudenteController implements DatabaseObserver {
+
     @FXML
-    private BorderPane mainPane;
-    @FXML
-    private BorderPane giustificaPane;
+    private BorderPane mainPane, giustificaPane;
     @FXML
     private TableView<Assenza> assenzeTable;
     @FXML
-    private TableColumn<Assenza, String> dataColumn;
-    @FXML
-    private TableColumn<Assenza, String> motivazioneColumn;
-    @FXML
-    private TableColumn<Assenza, String> giustificataColumn;
+    private TableColumn<Assenza, String> dataColumn, motivazioneColumn, giustificataColumn;
     @FXML
     private TextArea motivazioneArea;
     @FXML
     private Button giustificaButton;
 
-    private ObservableList<Assenza> assenzeList = FXCollections.observableArrayList();
+    private final ObservableList<Assenza> assenzeList = FXCollections.observableArrayList();
 
+    // Inizializza il controller: registra observer, configura colonne e carica dati
     public void initialize() {
-        // Registra questo controller come observer del database
         Database.getInstance().attach(this);
 
-        // Configura le colonne della tabella
         dataColumn.setCellValueFactory(cellData -> {
             Assenza a = cellData.getValue();
             return new SimpleStringProperty(a.giorno() + "/" + a.mese() + "/" + a.anno());
@@ -54,16 +48,14 @@ public class AssenzeStudenteController implements DatabaseObserver {
                 new SimpleStringProperty(cellData.getValue().giustificata() ? "Sì" : "No")
         );
 
-        // Carica i dati
         loadData();
     }
 
-    // Carica le assenze dello studente dalla base dati
+    // Carica le assenze dello studente e ordina dalla meno recente alla più recente
     private void loadData() {
         String username = SceneHandler.getInstance().getUsername();
-        // recupero le assenze dello studente
         List<Assenza> assenze = Database.getInstance().getAssenzeStudente(username);
-        // Ordino dalla meno recente alla più recente
+
         assenze.sort(Comparator.comparing(Assenza::anno)
                 .thenComparing(Assenza::mese)
                 .thenComparing(Assenza::giorno));
@@ -72,12 +64,14 @@ public class AssenzeStudenteController implements DatabaseObserver {
         assenzeTable.setItems(assenzeList);
     }
 
+    // Torna alla home dello studente e rimuove l'observer
     @FXML
     public void backClicked() throws IOException {
         Database.getInstance().detach(this);
         SceneHandler.getInstance().setStudentHomePage(SceneHandler.getInstance().getUsername());
     }
 
+    // Mostra il pannello per giustificare un'assenza selezionata
     @FXML
     public void giustificaClicked() {
         Assenza selected = assenzeTable.getSelectionModel().getSelectedItem();
@@ -96,6 +90,7 @@ public class AssenzeStudenteController implements DatabaseObserver {
         giustificaPane.setVisible(true);
     }
 
+    // Conferma la giustificazione dell'assenza selezionata
     @FXML
     public void confermaGiustificaClicked() {
         Assenza selected = assenzeTable.getSelectionModel().getSelectedItem();
@@ -108,10 +103,10 @@ public class AssenzeStudenteController implements DatabaseObserver {
 
         Database.getInstance().justifyAssenza(selected, motivazione);
 
-        // Chiudi il pannello
         annullaGiustificaClicked();
     }
 
+    // Chiude il pannello di giustificazione
     @FXML
     public void annullaGiustificaClicked() {
         giustificaPane.setVisible(false);
@@ -119,27 +114,18 @@ public class AssenzeStudenteController implements DatabaseObserver {
         mainPane.setEffect(null);
     }
 
-    // Metodo chiamato quando i dati nel database cambiano
+    // Aggiorna la tabella quando i dati nel database cambiano
     @Override
     public void update(DatabaseEvent event) {
-        // Gestiamo i vari tipi di eventi relativi alle assenze
         switch (event.type()) {
             case ASSENZA_AGGIUNTA:
             case ASSENZA_GIUSTIFICATA:
             case ASSENZA_ELIMINATA:
-
-                // Poiché il Database ora passa 'null', non filtriamo più per studente.
-                // La tabella verrà ricaricata ogni volta che avviene una modifica alle assenze.
                 System.out.println("Notifica ricevuta: " + event.type() + ". Aggiornamento tabella in corso...");
-
-                // Eseguiamo l'aggiornamento della UI sul thread di JavaFX
-                // Il metodo loadData() recupera internamente lo username corretto dal SceneHandler
                 javafx.application.Platform.runLater(this::loadData);
                 break;
-
             default:
                 break;
         }
     }
 }
-

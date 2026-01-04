@@ -29,219 +29,144 @@ import java.util.List;
 
 public class AndamentoController implements DatabaseObserver {
 
-    // Elenco delle materie dell'istituto
-    private List<String> materie = new ArrayList<>();
-
-    // Username dello studente loggato
-    private String studente;
-
-    // Lista dei voti dello studente
-    private List<ValutazioneStudente> voti = new ArrayList<>();
-
-    // Contesto per l'esportazione (Pattern Strategy)
-    private final ExportContext exportContext = ExportContext.getInstance();
+    private List<String> materie = new ArrayList<>();   // Materie dell'istituto
+    private String studente;                            // Username dello studente loggato
+    private List<ValutazioneStudente> voti = new ArrayList<>(); // Voti dello studente
+    private final ExportContext exportContext = ExportContext.getInstance(); // Contesto strategia esportazione
 
     @FXML
-    private VBox listaVotiVBox;          // Contenitore delle card dei voti
+    private VBox listaVotiVBox;
     @FXML
-    private BarChart<String, Number> andamentoChart;   // Grafico andamento voti
+    private BarChart<String, Number> andamentoChart;
     @FXML
-    private CategoryAxis materieX;       // Asse X del grafico (materie)
+    private CategoryAxis materieX;
     @FXML
-    private Label votiInAttesaLabel;     // Numero voti mancanti
-    @FXML
-    private Label insufficienzeLabel;    // Numero voti insufficienti
-    @FXML
-    private Label sufficienzeLabel;      // Numero voti sufficienti
-    @FXML
-    private Label mediaVoti;             // Media dei voti dello studente
-    @FXML
-    private Label nominativoStudente;    // Nome e cognome dello studente
-    @FXML
-    private Label classeStudente;        // Classe dello studente
+    private Label votiInAttesaLabel, insufficienzeLabel, sufficienzeLabel, mediaVoti, nominativoStudente, classeStudente;
 
-
-    // Metodo per tornare alla home dello studente e rimuovere l'observer per evitare notifiche inutili
+    // Torna alla home dello studente e rimuove l'observer
     @FXML
     private void backButtonClicked() throws IOException {
         Database.getInstance().detach(this);
         SceneHandler.getInstance().setStudentHomePage(studente);
     }
 
-
+    // Inizializza il controller e la UI
     @FXML
     public void initialize() {
-        // Carica username dello studente loggato
         studente = SceneHandler.getInstance().getUsername();
-
-        // Registra il controller come observer per le modifiche ai dati dello studente
         Database.getInstance().attach(this);
 
-        // Carica tutte le materie dell'istituto
         materie = Database.getInstance().getAllMaterieIstituto();
         materieX.setCategories(FXCollections.observableArrayList(materie));
 
-        // Carica voti dello studente
         voti = Database.getInstance().getVotiStudente(studente);
 
-        // Imposta informazioni dello studente nella UI
         nominativoStudente.setText(Database.getInstance().getFullName(studente).toUpperCase());
         classeStudente.setText(Database.getInstance().getClasseUser(studente).toUpperCase());
 
-        // Aggiorna tutte le sezioni dell'interfaccia
         updateChart(voti);
         updateListVoti(voti);
         updateRiepilogo(voti);
     }
 
-    // Aggiorna i contatori nel riepilogo
+    // Aggiorna riepilogo voti: insufficienze, sufficienze, voti in attesa e media
     private void updateRiepilogo(List<ValutazioneStudente> voti) {
-        // Inizializza contatori
-        int insufficienze = 0;
-        int sufficienze = 0;
-        int votiInAttesa = 0;
-        int sommaVoti = 0;
-        int votiTotali = 0;
+        int insufficienze = 0, sufficienze = 0, votiInAttesa = 0, sommaVoti = 0, votiTotali = 0;
 
-        // Analizza la valutazione di ogni materia
         for (ValutazioneStudente voto : voti) {
-            if (voto.voto() == 0) {
-                votiInAttesa++;  // 0 = voto non ancora assegnato
-            } else {
+            if (voto.voto() == 0) votiInAttesa++;
+            else {
                 votiTotali++;
                 sommaVoti += voto.voto();
-
                 if (voto.voto() < 6) insufficienze++;
                 else sufficienze++;
             }
         }
 
-        // Aggiorna i riepiloghi numerici
         votiInAttesaLabel.setText(String.valueOf(votiInAttesa));
         insufficienzeLabel.setText(String.valueOf(insufficienze));
         sufficienzeLabel.setText(String.valueOf(sufficienze));
 
-        // Calcolo media con formattazione
-        double media = (double) sommaVoti / votiTotali;
+        double media = (votiTotali > 0) ? (double) sommaVoti / votiTotali : 0.0;
         mediaVoti.setText(String.format("%.2f", media));
     }
 
-    // Aggiorna la lista dei voti visualizzati
+    // Aggiorna la lista dei voti visualizzati come card
     private void updateListVoti(List<ValutazioneStudente> voti) {
-        // Ripulisce la lista e rigenera tutte le card dei voti
         listaVotiVBox.getChildren().clear();
-        for (ValutazioneStudente voto : voti) {
-            generaLabel(voto);
-        }
+        for (ValutazioneStudente voto : voti) generaLabel(voto);
     }
 
-    // Genera una card per ogni voto
+    // Genera la card di un singolo voto
     private void generaLabel(ValutazioneStudente voto) {
-        // Contenitore stile card
-        BorderPane newBorderPane = new BorderPane();
+        BorderPane card = new BorderPane();
 
-        // Label materia + voto
-        Label materia_Voto = new Label(
-                voto.materia().toUpperCase() + ": " + voto.voto()
-        );
-        materia_Voto.setFont(Font.font("Helvetica", FontWeight.BOLD, FontPosture.REGULAR, 15));
+        Label materiaVoto = new Label(voto.materia().toUpperCase() + ": " + voto.voto());
+        materiaVoto.setFont(Font.font("Helvetica", FontWeight.BOLD, FontPosture.REGULAR, 15));
 
-        // Label data del voto
         Label date = new Label(voto.data());
         date.setFont(Font.font("Helvetica", FontWeight.NORMAL, FontPosture.REGULAR, 14));
 
-        // Stile base card
-        newBorderPane.setStyle(
-                "-fx-border-radius: 10px;" +
-                        "-fx-background-radius: 10px;" +
-                        "-fx-padding: 10px;"
-        );
+        card.setStyle("-fx-border-radius:10px; -fx-background-radius:10px; -fx-padding:10px;");
 
-        // Colori in base alla valutazione
-        if (voto.voto() > 1 && voto.voto() < 6) {
-            newBorderPane.setStyle(newBorderPane.getStyle() + "-fx-background-color: #f55c47;");
-        } else if (voto.voto() >= 6) {
-            newBorderPane.setStyle(newBorderPane.getStyle() + "-fx-background-color: #9fe6a0;");
-        } else {
-            newBorderPane.setStyle(newBorderPane.getStyle() + "-fx-background-color: #e5e4e2;");
-        }
+        if (voto.voto() > 1 && voto.voto() < 6) card.setStyle(card.getStyle() + "-fx-background-color: #f55c47;");
+        else if (voto.voto() >= 6) card.setStyle(card.getStyle() + "-fx-background-color: #9fe6a0;");
+        else card.setStyle(card.getStyle() + "-fx-background-color: #e5e4e2;");
 
-        // Posizionamento elementi
-        newBorderPane.setTop(materia_Voto);
-        newBorderPane.setCenter(date);
-        newBorderPane.setAlignment(materia_Voto, Pos.CENTER);
-        newBorderPane.setAlignment(date, Pos.CENTER);
+        card.setTop(materiaVoto);
+        card.setCenter(date);
+        card.setAlignment(materiaVoto, Pos.CENTER);
+        card.setAlignment(date, Pos.CENTER);
 
-        listaVotiVBox.getChildren().add(newBorderPane);
+        listaVotiVBox.getChildren().add(card);
     }
 
     // Aggiorna il grafico dell'andamento dei voti
     private void updateChart(List<ValutazioneStudente> voti) {
-        // Crea una nuova serie per il grafico
+        andamentoChart.getData().clear();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-
-        // Inserisce i dati nel grafico
         for (ValutazioneStudente voto : voti) {
             if (voto.voto() != 0) {
                 XYChart.Data<String, Number> data = new XYChart.Data<>(voto.materia(), voto.voto());
-
-                // Cambia colore della barra dopo la creazione del nodo grafico
-                data.nodeProperty().addListener((observable, oldNode, newNode) -> {
+                data.nodeProperty().addListener((obs, oldNode, newNode) -> {
                     if (newNode != null) {
-                        if (voto.voto() >= 6) {
-                            newNode.setStyle("-fx-background-color: #9fe6a0");
-                        } else {
-                            newNode.setStyle("-fx-background-color: #f55c47;");
-                        }
+                        newNode.setStyle(voto.voto() >= 6 ? "-fx-background-color: #9fe6a0" : "-fx-background-color: #f55c47;");
                     }
                 });
-
                 series.getData().add(data);
             }
         }
-
         andamentoChart.getData().add(series);
-        andamentoChart.setLegendVisible(false);  // Nasconde la legenda
+        andamentoChart.setLegendVisible(false);
     }
 
-    // Metodo chiamato quando i dati dello studente vengono aggiornati (Observer Pattern)
+    // Aggiorna UI quando riceve eventi dal database
     @Override
     public void update(DatabaseEvent event) {
-        // Verifichiamo se l'evento riguarda un aggiornamento dei voti o l'inserimento di una nota
-        if (event.type() == DatabaseEventType.VOTO_AGGIORNATO || event.type() == DatabaseEventType.NOTA_INSERITA) {
+        if ((event.type() == DatabaseEventType.VOTO_AGGIORNATO || event.type() == DatabaseEventType.NOTA_INSERITA)
+                && event.data() != null && event.data().equals(studente)) {
 
-            // Verifichiamo se l'evento riguarda lo studente attualmente loggato
-            if (event.data() != null && event.data().equals(studente)) {
-
-                // Eseguiamo l'aggiornamento della UI sul thread di JavaFX
-                javafx.application.Platform.runLater(() -> {
-                    // Ricarica i voti aggiornati dal database
-                    voti = Database.getInstance().getVotiStudente(studente);
-
-                    // Aggiorna i componenti della UI
-                    updateChart(voti);
-                    updateListVoti(voti);
-                    updateRiepilogo(voti);
-
-                    System.out.println("Andamento ricaricato per lo studente: " + studente);
-                });
-            }
+            javafx.application.Platform.runLater(() -> {
+                voti = Database.getInstance().getVotiStudente(studente);
+                updateChart(voti);
+                updateListVoti(voti);
+                updateRiepilogo(voti);
+                System.out.println("Andamento ricaricato per lo studente: " + studente);
+            });
         }
     }
 
+    // Esporta valutazioni in PDF
     @FXML
     private void exportPDF(MouseEvent event) {
-        // Impostiamo la strategia concreta per l'esportazione in PDF
         exportContext.setStrategy(new PDFStudenteStrategy());
-        // Eseguiamo l'esportazione
         exportContext.exportValutazione(voti);
     }
 
+    // Esporta valutazioni in CSV
     @FXML
     public void exportCSV(MouseEvent mouseEvent) {
-        // Impostiamo la strategia concreta
         exportContext.setStrategy(new CSVStudenteStrategy());
-        // Eseguiamo l'esportazione
         exportContext.exportValutazione(voti);
     }
 }

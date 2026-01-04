@@ -1,8 +1,8 @@
 package application.dao;
 
-import application.persistence.DatabaseConnection;
 import application.model.StudenteTable;
 import application.model.ValutazioneStudente;
+import application.persistence.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,13 +14,14 @@ import java.util.List;
 public class VotiDAO {
 
     public VotiDAO() {
-        createTables();
+        createTables(); // Crea la tabella studentiVoti se non esiste
     }
 
     private Connection getConnection() {
         return DatabaseConnection.getInstance().getConnection();
     }
 
+    // Crea la tabella voti degli studenti
     private void createTables() {
         String CREATE_STUDENTI_VOTI_TABLE = """
                 CREATE TABLE IF NOT EXISTS studentiVoti (
@@ -40,7 +41,7 @@ public class VotiDAO {
         }
     }
 
-    // New method to initialize votes for a student in a materia
+    // Inizializza un voto per uno studente in una materia
     public void initializeVoto(String studente, String materia) {
         String query = "INSERT INTO studentiVoti (studente, materia, dataValutazione, voto) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -54,6 +55,7 @@ public class VotiDAO {
         }
     }
 
+    // Recupera tutti gli studenti di una classe con il voto per una materia
     public List<StudenteTable> getStudentiClasse(String classe, String materia) {
         List<StudenteTable> studenti = new ArrayList<>();
         String query = """
@@ -63,18 +65,18 @@ public class VotiDAO {
                 WHERE u.classeAppartenenza = ? AND sv.materia = ?
                 ORDER BY u.cognome, u.nome, sv.dataValutazione
                 """;
-
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             statement.setString(1, classe);
             statement.setString(2, materia);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                String nome = resultSet.getString("nome");
-                String cognome = resultSet.getString("cognome");
-                String dataValutazione = resultSet.getString("dataValutazione");
-                Integer voto = resultSet.getInt("voto");
-                String username = resultSet.getString("username");
-                studenti.add(new StudenteTable(nome, cognome, dataValutazione, voto, username));
+                studenti.add(new StudenteTable(
+                        resultSet.getString("nome"),
+                        resultSet.getString("cognome"),
+                        resultSet.getString("dataValutazione"),
+                        resultSet.getInt("voto"),
+                        resultSet.getString("username")
+                ));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante il recupero degli studenti: " + e.getMessage(), e);
@@ -82,26 +84,26 @@ public class VotiDAO {
         return studenti;
     }
 
+    // Aggiorna il voto di uno studente in una materia
     public boolean updateVoto(ValutazioneStudente valutazione) {
         String query = """
                 UPDATE studentiVoti
                 SET voto = ?, dataValutazione = ?
                 WHERE studente = ? AND materia = ?
                 """;
-        boolean result = false;
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             statement.setInt(1, valutazione.voto());
             statement.setString(2, valutazione.data());
             statement.setString(3, valutazione.studente());
             statement.setString(4, valutazione.materia());
             statement.executeUpdate();
-            result = true;
+            return true;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return result;
     }
 
+    // Recupera tutti i voti di uno studente con i relativi professori
     public List<ValutazioneStudente> getVotiStudente(String studente) {
         List<ValutazioneStudente> voti = new ArrayList<>();
         String query = """
@@ -114,11 +116,13 @@ public class VotiDAO {
             statement.setString(1, studente);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                String materia = resultSet.getString("materia");
-                String dataValutazione = resultSet.getString("dataValutazione");
-                int voto = resultSet.getInt("voto");
-                String professore = resultSet.getString("professore");
-                voti.add(new ValutazioneStudente(studente, professore, materia, dataValutazione, voto));
+                voti.add(new ValutazioneStudente(
+                        studente,
+                        resultSet.getString("professore"),
+                        resultSet.getString("materia"),
+                        resultSet.getString("dataValutazione"),
+                        resultSet.getInt("voto")
+                ));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

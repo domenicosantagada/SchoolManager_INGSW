@@ -6,5 +6,3 @@ import java.io.File;
 public interface ExportStrategy<T> {
     void export(T data, File outputFile) throws Exception;
 }
-
-

@@ -1,7 +1,7 @@
 package application.dao;
 
-import application.persistence.DatabaseConnection;
 import application.model.Assenza;
+import application.persistence.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,13 +13,14 @@ import java.util.List;
 public class AssenzeDAO {
 
     public AssenzeDAO() {
-        createTables();
+        createTables(); // Crea la tabella assenze se non esiste
     }
 
     private Connection getConnection() {
         return DatabaseConnection.getInstance().getConnection();
     }
 
+    // Crea la tabella assenze con vincoli e chiave primaria
     private void createTables() {
         String CREATE_ASSENZE_TABLE = """
                 CREATE TABLE IF NOT EXISTS assenze (
@@ -40,6 +41,7 @@ public class AssenzeDAO {
         }
     }
 
+    // Aggiunge una nuova assenza per uno studente
     public void addAssenza(Assenza assenza) {
         String query = "INSERT INTO assenze (studente, giorno, mese, anno, motivazione, giustificata) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -55,6 +57,7 @@ public class AssenzeDAO {
         }
     }
 
+    // Restituisce tutte le assenze di uno studente ordinate per data decrescente
     public List<Assenza> getAssenzeStudente(String studente) {
         List<Assenza> assenze = new ArrayList<>();
         String query = """
@@ -80,6 +83,7 @@ public class AssenzeDAO {
         return assenze;
     }
 
+    // Restituisce le assenze di uno studente per un mese specifico
     public List<Assenza> getAssenzeStudente(String studente, int m) {
         List<Assenza> assenze = new ArrayList<>();
         String query = """
@@ -105,6 +109,7 @@ public class AssenzeDAO {
         return assenze;
     }
 
+    // Giustifica un'assenza aggiornando motivazione e flag
     public void justifyAssenza(Assenza assenza, String motivazione) {
         String query = """
                 UPDATE assenze
@@ -123,6 +128,7 @@ public class AssenzeDAO {
         }
     }
 
+    // Elimina un'assenza specifica
     public void deleteAssenza(String studente, int giorno, int mese, int anno) {
         String query = "DELETE FROM assenze WHERE studente = ? AND giorno = ? AND mese = ? AND anno = ?";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {

@@ -22,55 +22,47 @@ public class PDFClasseStrategy implements ExportVotiClasse {
     private final Database database = Database.getInstance();
     private final SceneHandler sceneHandler = SceneHandler.getInstance();
 
+    // Esporta l'andamento della classe in PDF
     @Override
     public void export(List<StudenteTable> studenti, File file) throws Exception {
         if (file == null) return;
         creaPDFAndamento(studenti, file.getAbsolutePath());
     }
 
+    // Crea il PDF con intestazione, tabella dei voti e footer
     private void creaPDFAndamento(List<StudenteTable> studenti, String outputPath) throws IOException, DocumentException {
-        // Data needed from SceneHandler/Database
         String username = sceneHandler.getUsername();
         String nominativo = database.getFullName(username);
         String classe = database.getClasseUser(username);
         String materia = database.getMateriaProf(username);
 
-        // Sort the list as done in old PDFGenerator
+        // Ordina gli studenti per cognome
         studenti.sort((s1, s2) -> s1.cognome().compareTo(s2.cognome()));
 
-        // Crea il documento PDF
         Document document = new Document();
-
-        // Crea un writer per scrivere nel file PDF
         PdfWriter.getInstance(document, new FileOutputStream(outputPath));
-
-        // Apri il documento per iniziare ad aggiungere contenuti
         document.open();
 
-        // Aggiungo il logo della scuola centrato
+        // Aggiunge logo e intestazione della scuola
         Image logo = Image.getInstance(getClass().getResource("/icon/logo.png"));
         logo.scaleToFit(100, 100);
         logo.setAlignment(Element.ALIGN_CENTER);
         document.add(logo);
 
-        // Aggiungo l'intestazione della scuola al di sotto del logo
         Font schoolFont = new Font(Font.FontFamily.HELVETICA, 13, Font.ITALIC);
-        Paragraph school = new Paragraph("Istituto Comprensivo Statale\n" +
-                "Giovanni Falcone", schoolFont);
+        Paragraph school = new Paragraph("Istituto Comprensivo Statale\nGiovanni Falcone", schoolFont);
         school.setAlignment(Element.ALIGN_CENTER);
         document.add(school);
-
-        //aggiungo spazio dopo l'intestazione
         document.add(new Paragraph("\n\n"));
 
+        // Titolo del documento
         Font typeDocument = new Font(Font.FontFamily.HELVETICA, 17, Font.BOLD);
         Paragraph type = new Paragraph("ANDAMENTO CLASSE " + classe, typeDocument);
         type.setAlignment(Element.ALIGN_CENTER);
         document.add(type);
-
         document.add(new Paragraph("\n"));
 
-
+        // Materia e docente
         Font materiaFont = new Font(Font.FontFamily.HELVETICA, 17, Font.BOLD);
         Paragraph student = new Paragraph(materia, materiaFont);
         student.setAlignment(Element.ALIGN_CENTER);
@@ -85,22 +77,16 @@ public class PDFClasseStrategy implements ExportVotiClasse {
         Paragraph docente = new Paragraph(nominativo.toUpperCase(), profFont);
         docente.setAlignment(Element.ALIGN_CENTER);
         document.add(docente);
-
-
-        //aggiungo spazio dopo i dati dello studente
         document.add(new Paragraph("\n"));
 
-        // Crea una tabella con 3 colonne
+        // Creazione della tabella dei voti
         PdfPTable table = new PdfPTable(3); // Studente - Data Valutazione - Voto
-        table.setWidths(new int[]{2, 2, 1}); // Larghezza delle colonne
+        table.setWidths(new int[]{2, 2, 1});
         table.setSpacingBefore(10f);
         table.setSpacingAfter(10f);
 
-        // Font per le intestazioni e le celle
         Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
         Font cellFont = new Font(Font.FontFamily.HELVETICA, 12);
-
-        // Colore di sfondo per l'intestazione
         BaseColor headerBgColor = new BaseColor(173, 216, 230); // Azzurro chiaro
 
         // Intestazioni della tabella
@@ -114,23 +100,20 @@ public class PDFClasseStrategy implements ExportVotiClasse {
             table.addCell(cell);
         }
 
-        // Dati della tabella
+        // Riempie la tabella con i dati degli studenti
         for (StudenteTable s : studenti) {
-            // Cella studente
             PdfPCell cell = new PdfPCell(new Phrase(s.cognome().toUpperCase() + " " + s.nome().toUpperCase(), cellFont));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             cell.setPadding(8f);
             table.addCell(cell);
 
-            // Cella data
             cell = new PdfPCell(new Phrase(s.dataValutazione(), cellFont));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             cell.setPadding(8f);
             table.addCell(cell);
 
-            // Cella voto
             String votoString = s.voto() == 0 ? "N.d." : String.valueOf(s.voto());
             cell = new PdfPCell(new Phrase(votoString, cellFont));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -140,27 +123,25 @@ public class PDFClasseStrategy implements ExportVotiClasse {
         }
         document.add(table);
 
-        //aggiungo note esplicative
+        // Note esplicative
         Font noteFont = new Font(Font.FontFamily.HELVETICA, 7, Font.ITALIC);
         Paragraph note = new Paragraph("* N.d. = Non sono ancora disponibili valutazioni per la materia da parte del docente.", noteFont);
         note.setAlignment(Element.ALIGN_LEFT);
         document.add(note);
-
-        //Aggiungo spazio dopo la tabella
         document.add(new Paragraph("\n\n"));
 
-        // Font del footer personalizzato
+        // Footer con data di generazione
         Font footerFont = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLDITALIC, BaseColor.GRAY);
         String currentDate = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
-        Paragraph footer = new Paragraph(new Paragraph("Documento generato in data: " + currentDate, footerFont));
+        Paragraph footer = new Paragraph("Documento generato in data: " + currentDate, footerFont);
         footer.setAlignment(Element.ALIGN_RIGHT);
         document.add(footer);
 
-        // Chiudi il documento
         document.close();
         System.out.println("PDF creato con successo! -> Pattern Strategy");
     }
 
+    // Mostra dialogo per salvare il PDF
     public static File getFile(String nominativo, String classe, Window owner) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Salva PDF");

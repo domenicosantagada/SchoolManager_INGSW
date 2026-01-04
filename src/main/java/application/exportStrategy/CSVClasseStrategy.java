@@ -7,20 +7,23 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Strategia Concreta per l'esportazione dell'andamento di classe in formato CSV.
- */
+// Strategia concreta per esportare l'andamento di una classe in formato CSV
 public class CSVClasseStrategy implements ExportVotiClasse {
 
+    /**
+     * Esporta i dati degli studenti su file CSV.
+     * Scrive cognome, nome, data valutazione e voto.
+     */
     @Override
     public void export(List<StudenteTable> studenti, File file) throws Exception {
         if (file == null) return;
 
         try (FileWriter writer = new FileWriter(file)) {
-            // Intestazione del file CSV
+
+            // Intestazione CSV
             writer.append("Cognome;Nome;Data Valutazione;Voto\n");
 
-            // Scrittura dei dati della classe
+            // Scrive ogni studente nel CSV
             for (StudenteTable studente : studenti) {
                 String votoString = studente.voto() == 0 ? "N.d." : String.valueOf(studente.voto());
                 writer.append(String.format("%s;%s;%s;%s\n",
@@ -31,12 +34,11 @@ public class CSVClasseStrategy implements ExportVotiClasse {
                 ));
             }
 
-            System.out.println("CSV per la classe creato con successo!");
+            System.out.println("CSV della classe creato con successo!");
 
         } catch (IOException e) {
+            // Propaga l'eccezione con messaggio chiaro
             throw new Exception("Errore durante la scrittura del file CSV.", e);
         }
     }
-
-    // Potresti aggiungere un metodo getFile simile a quello del PDF se devi personalizzare il FileChooser.
 }

@@ -1,9 +1,9 @@
 package application.controller.studente;
 
+import application.model.Assenza;
+import application.observer.DatabaseObserver;
 import application.persistence.Database;
 import application.persistence.DatabaseEvent;
-import application.model.Assenza;
-import application.observer.Observer;
 import application.view.SceneHandler;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
-public class AssenzeStudenteController implements Observer {
+public class AssenzeStudenteController implements DatabaseObserver {
     @FXML
     private BorderPane mainPane;
     @FXML

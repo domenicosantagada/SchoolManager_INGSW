@@ -3,23 +3,9 @@
 1. **Build del progetto:** `mvn clean install`
 2. **Esecuzione:** `mvn javafx:run`
 
-
-1. **Build del progetto:** `mvn clean install`
-2. **Esecuzione:** `mvn javafx:run`
-
 👨‍🏫 Docenti
 | Username | Password |
 | -------- | -------- |
-| prof1 | 0000 |
-| prof2 | 0000 |
-| prof3 | 0000 |
-| prof4 | 0000 |
-| prof5 | 0000 |
-| prof6 | 0000 |
-| prof7 | 0000 |
-| prof8 | 0000 |
-| prof9 | 0000 |
-| prof10 | 0000 |
 | prof1 | 0000 |
 | prof2 | 0000 |
 | prof3 | 0000 |
@@ -44,17 +30,6 @@
 | stud8 | 2A | 0000 |
 | stud9 | 2A | 0000 |
 | stud10 | 2A | 0000 |
-| stud1 | 1A | 0000 |
-| stud2 | 1A | 0000 |
-| stud3 | 1A | 0000 |
-| stud4 | 1A | 0000 |
-| stud5 | 1A | 0000 |
-| stud6 | 2A | 0000 |
-| stud7 | 2A | 0000 |
-| stud8 | 2A | 0000 |
-| stud9 | 2A | 0000 |
-| stud10 | 2A | 0000 |
-
 ---
 
 # 📘 SCHOOL MANAGER
@@ -221,7 +196,7 @@ Questa sezione è dedicata alla **creazione e assegnazione di attività didattic
 - Controllo del contenuto del campo di testo:
     - campo vuoto o contenente solo spazi → messaggio di avviso (`CAMPS_NOT_EMPTY`)
 - Conferma visiva dell’operazione in caso di inserimento corretto
-- Pulizia automatica del campo di input
+- Pulizia automatica del campo di input dopo l’assegnazione del compito
 
 **Navigazione**
 

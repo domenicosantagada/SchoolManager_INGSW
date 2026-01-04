@@ -1,13 +1,16 @@
 package application.exportStrategy;
 
-import application.persistence.Database;
 import application.model.StudenteTable;
 import application.model.ValutazioneStudente;
+import application.persistence.Database;
 import application.view.SceneHandler;
 import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.util.List;
+
+// Classe Context per gestire l'esportazione utilizzando diverse strategie di esportazione (PDF, CSV, ecc.)
+// E' implementata come Singleton per garantire un'unica istanza in tutta l'applicazione.
 
 public class ExportContext {
 
@@ -42,7 +45,7 @@ public class ExportContext {
 
     @SuppressWarnings("unchecked")
     public void exportValutazione(List<ValutazioneStudente> voti) {
-        if (strategy instanceof StudentEvaluationStrategy studentStrategy) {
+        if (strategy instanceof ExportVotiStudente studentStrategy) {
             try {
                 String username = sceneHandler.getUsername();
                 String nominativo = database.getFullName(username);
@@ -71,7 +74,7 @@ public class ExportContext {
 
     @SuppressWarnings("unchecked")
     public void exportAndamentoClasse(List<StudenteTable> studentiList) {
-        if (strategy instanceof ClassEvaluationStrategy classStrategy) {
+        if (strategy instanceof ExportVotiClasse classStrategy) {
             try {
                 String username = sceneHandler.getUsername();
                 String nominativo = database.getFullName(username);

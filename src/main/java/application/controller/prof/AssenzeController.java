@@ -2,7 +2,7 @@ package application.controller.prof;
 
 import application.model.Assenza;
 import application.model.StudenteTable;
-import application.observer.Observer;
+import application.observer.DatabaseObserver;
 import application.persistence.Database;
 import application.persistence.DatabaseEvent;
 import application.utility.MessageDebug;
@@ -22,10 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AssenzeController implements Observer {
+public class AssenzeController implements DatabaseObserver {
 
     @FXML
-    private ChoiceBox studentChoiceBox;
+    private ChoiceBox<String> studentChoiceBox;
 
     @FXML
     private DatePicker absenceDatePicker;

@@ -4,7 +4,7 @@ import application.exportStrategy.CSVStudenteStrategy;
 import application.exportStrategy.ExportContext;
 import application.exportStrategy.PDFStudenteStrategy;
 import application.model.ValutazioneStudente;
-import application.observer.Observer;
+import application.observer.DatabaseObserver;
 import application.persistence.Database;
 import application.persistence.DatabaseEvent;
 import application.persistence.DatabaseEventType;
@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AndamentoController implements Observer {
+public class AndamentoController implements DatabaseObserver {
 
     // Elenco delle materie dell'istituto
     private List<String> materie = new ArrayList<>();

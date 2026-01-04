@@ -1,10 +1,10 @@
 package application.controller.prof;
 
+import application.model.CompitoAssegnato;
+import application.observer.DatabaseObserver;
 import application.persistence.Database;
 import application.persistence.DatabaseEvent;
 import application.persistence.DatabaseEventType;
-import application.model.CompitoAssegnato;
-import application.observer.Observer;
 import application.utility.MessageDebug;
 import application.view.SceneHandler;
 import javafx.application.Platform;
@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class CompitiController implements Observer {
+public class CompitiController implements DatabaseObserver {
 
     @FXML
     private Label classLabel;

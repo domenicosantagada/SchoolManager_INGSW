@@ -2,8 +2,8 @@ package application.persistence;
 
 import application.dao.*;
 import application.model.*;
-import application.observer.Observer;
-import application.observer.Subject;
+import application.observer.DatabaseObserver;
+import application.observer.DatabaseSubject;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -11,12 +11,12 @@ import java.util.List;
 
 // Classe Database: Singleton che gestisce la connessione al database
 // e funge da soggetto nell'Observer Pattern
-public class Database implements Subject {
+public class Database implements DatabaseSubject {
 
     // Singleton
     private static final Database instance = new Database();
     // Lista di observer registrati che verranno notificati in caso di cambiamenti
-    private final List<Observer> observers = new ArrayList<>();
+    private final List<DatabaseObserver> observers = new ArrayList<>();
     // DAOs
     private UserDAO userDAO;
     private SchoolDAO schoolDAO;
@@ -223,7 +223,7 @@ public class Database implements Subject {
 
     // Registra un observer alla lista
     @Override
-    public void attach(Observer observer) {
+    public void attach(DatabaseObserver observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
         }
@@ -231,7 +231,7 @@ public class Database implements Subject {
 
     // Rimuove un observer dalla lista
     @Override
-    public void detach(Observer observer) {
+    public void detach(DatabaseObserver observer) {
         observers.remove(observer);
     }
 
@@ -239,7 +239,7 @@ public class Database implements Subject {
     @Override
     public void notifyObservers(DatabaseEvent event) {
         // Firma aggiornata per accettare DatabaseEvent
-        for (Observer observer : new ArrayList<>(observers)) {
+        for (DatabaseObserver observer : new ArrayList<>(observers)) {
             System.out.println("Notificando observer: " + observer + " | Evento: " + event.type());
             observer.update(event); // Chiamata al metodo update dell'interfaccia
         }

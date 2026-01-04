@@ -6,7 +6,7 @@ import application.exportStrategy.PDFClasseStrategy;
 import application.model.Nota;
 import application.model.StudenteTable;
 import application.model.ValutazioneStudente;
-import application.observer.Observer;
+import application.observer.DatabaseObserver;
 import application.persistence.Database;
 import application.persistence.DatabaseEvent;
 import application.persistence.DatabaseEventType;
@@ -31,7 +31,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class StudentiController implements Observer {
+public class StudentiController implements DatabaseObserver {
 
     // Lista osservabile per la tabella degli studenti
     private ObservableList<StudenteTable> studenti = FXCollections.observableArrayList();
